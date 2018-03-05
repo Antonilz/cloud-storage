@@ -1,0 +1,44 @@
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "axios": "^0.16.2",
+    "babel-plugin-emotion": "^7.3.2",
+    "emotion": "^7.3.2",
+    "history": "^4.7.2",
+    "moment": "^2.21.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.1.0",
+    "react-dropzone": "^4.2.8",
+    "react-dropzone-s3-uploader": "^1.1.0",
+    "react-emotion": "^7.3.2",
+    "react-helmet": "^5.2.0",
+    "react-images": "^0.5.17",
+    "react-notifications": "^1.4.3",
+    "react-redux": "^5.0.7",
+    "react-router": "^4.2.0",
+    "react-router-dom": "^4.2.2",
+    "react-router-redux": "^5.0.0-alpha.9",
+    "react-s3-uploader": "^4.6.2",
+    "react-scripts": "1.0.14",
+    "redux": "^3.7.2",
+    "redux-form": "^7.1.2",
+    "redux-saga": "^0.15.6",
+    "reselect": "^3.0.1",
+    "semantic-ui-css": "^2.2.12",
+    "semantic-ui-react": "^0.78.3",
+    "why-did-you-update": "^0.1.1"
+  },
+  "proxy": {
+    "/api/*": {
+      "target": "http://localhost:5000"
+    }
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
