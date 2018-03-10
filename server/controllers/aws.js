@@ -103,8 +103,9 @@ exports.getSignedUploadLink = async (req, res) => {
     });*/
 
   const minioClient = new Minio.Client({
-    endPoint: 'play.minio.io',
-    port: 9000,
+    //endPoint: 'play.minio.io',
+    endPoint: '127.0.0.1',
+    port: 10000,
     secure: true,
     accessKey: keys.storageAccessKey,
     secretKey: keys.storageSecretAccessKey
@@ -115,13 +116,11 @@ exports.getSignedUploadLink = async (req, res) => {
     objectName: fileKey
   };
 
-  console.log(keys.storageSecretKey);
   minioClient.presignedPutObject(
     params.bucketName,
     params.objectName,
     24 * 60 * 60,
     function(err, presignedUrl) {
-      //console.log(presignedUrl);
       if (err) return console.log(err);
       res.json({
         signedUrl: presignedUrl,

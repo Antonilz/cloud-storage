@@ -25,6 +25,7 @@ class StorageActionsMenu extends PureComponent {
           </Menu.Item>
           <Menu.Item
             as={FolderCreatePopup}
+            path={this.props.path}
             onSubmitAction={this.props.handleCreateFolder}
           />
           {this.props.numOfSelectedItems > 0 && (

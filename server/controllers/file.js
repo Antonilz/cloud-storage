@@ -13,16 +13,16 @@ exports.create = async (req, res, next) => {
     if (parentPath != null && parentPath != '') {
       parentFolder = await Folder.findOne(
         {
-          path: parentPath
+          pathSlug: parentPath
         },
         { _id: 1 }
       );
     }
     const fileData = {
       ...req.body,
+      path: parentPath ? parentPath : '',
       parentID: parentFolder ? parentFolder._id : null
     };
-
     const file = new File(fileData);
     const savedFile = await file.save();
     res.status(httpStatus.CREATED);

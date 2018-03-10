@@ -20,7 +20,7 @@ router
    * @apiGroup User
    * @apiPermission user
    *
-   * @apiHeader {String} Athorization  User's access token
+   * @apiHeader {String} Authorization  User's access token
    *
    * @apiSuccess {String}  id         User's id
    * @apiSuccess {String}  name       User's name

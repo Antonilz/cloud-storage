@@ -3,43 +3,44 @@ import { separateLink } from '../utils/separateLink';
 import { Breadcrumb } from 'semantic-ui-react';
 
 class NavigationBreadcrumbs extends PureComponent {
-  handleLinkClick(link) {
-    const path = link.replace(/\/storage.|\/storage/, '');
-    this.props.onFolderClick(this.props.token, path, true);
+  handleLinkClick({ pathSlug }) {
+    this.props.onFolderClick({ pathSlug, notInitial: true });
   }
 
-  renderBreadcrumb(name, link, index, last = false) {
-    if (last) {
-      return <Breadcrumb.Section key={index}>{name}</Breadcrumb.Section>;
-    } else {
+  renderBreadcrumb({ name, pathSlug, nameSlug, index, last }) {
+    if (!last) {
       return [
         <Breadcrumb.Section
-          link
           key={index}
-          onClick={e => this.handleLinkClick(link)}
+          link
+          onClick={e => this.handleLinkClick({ pathSlug })}
         >
           {name}
         </Breadcrumb.Section>,
         <Breadcrumb.Divider icon="right chevron" key={`${index}-divider`} />
       ];
-    }
+    } else return <Breadcrumb.Section key={index}>{name}</Breadcrumb.Section>;
   }
 
   render() {
-    const { names, links } = separateLink(this.props.path);
+    const splitLink = separateLink(`/storage/${this.props.pathSlug}`);
+
+    const { names } = separateLink(`/storage/${this.props.path}`);
+    console.log(splitLink, names);
     return (
       <Breadcrumb size="big">
-        {names.map((curr, index) => {
+        {splitLink.names.map((curr, index) => {
+          let last = false;
           if (index === names.length - 1) {
-            return this.renderBreadcrumb(
-              names[index],
-              links[index],
-              index,
-              true
-            );
-          } else {
-            return this.renderBreadcrumb(names[index], links[index], index);
+            last = true;
           }
+          return this.renderBreadcrumb({
+            name: names[index],
+            pathSlug: splitLink.links[index],
+            nameSlug: splitLink.names[index],
+            index,
+            last
+          });
         })}
       </Breadcrumb>
     );

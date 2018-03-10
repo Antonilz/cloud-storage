@@ -17,6 +17,12 @@ const FileSchema = new Schema(
       unique: true
     },
     parentID: { type: Schema.Types.ObjectId, ref: 'Folder' },
+    path: {
+      type: String
+    },
+    pathSlug: {
+      type: String
+    },
     tags: [{ type: String }],
     size: Number,
     type: String,
@@ -34,7 +40,14 @@ FileSchema.index({ name: 'text' });
  */
 FileSchema.pre('save', async function save(next) {
   try {
-    this.slug = slug(this.name);
+    if (this.parentID != null) {
+      const parentFolder = Folder.get(this.parentID);
+      this.path = parentFolder.path;
+      this.pathSlug = parentFolder.pathSlug;
+    } else {
+      this.path = '';
+      this.pathSlug = '';
+    }
     return next();
   } catch (error) {
     return next(error);
@@ -62,7 +75,17 @@ FileSchema.pre('remove', async function save(next) {
 FileSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['id', 'name', 'parentID', 'size', 'type', 'updatedAt'];
+    const fields = [
+      'id',
+      'name',
+      'nameSlug',
+      'parentID',
+      'path',
+      'pathSlug',
+      'size',
+      'type',
+      'updatedAt'
+    ];
 
     fields.forEach(field => {
       transformed[field] = this[field];
@@ -72,9 +95,10 @@ FileSchema.method({
   },
 
   getDownloadLink(disposition = 'attachment') {
-    var minioClient = new Minio.Client({
-      endPoint: 'play.minio.io',
-      port: 9000,
+    const minioClient = new Minio.Client({
+      //endPoint: 'play.minio.io',
+      endPoint: '127.0.0.1',
+      port: 10000,
       secure: true,
       accessKey: keys.storageAccessKey,
       secretKey: keys.storageSecretAccessKey
@@ -117,9 +141,9 @@ FileSchema.method({
  */
 FileSchema.statics = {
   /**
-   * Get folder by id
+   * Get file by id
    *
-   * @param {ObjectId} id - The objectId of folder.
+   * @param {ObjectId} id - The objectId of file.
    * @returns {Promise<User, APIError>}
    */
   async get(id) {
@@ -135,7 +159,7 @@ FileSchema.statics = {
       }
 
       throw new Error({
-        message: 'Folder does not exist',
+        message: 'File does not exist',
         status: httpStatus.NOT_FOUND
       });
     } catch (error) {

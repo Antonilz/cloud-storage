@@ -3,8 +3,12 @@ import {
   SENDING_REQUEST,
   REQUEST_ERROR,
   CLEAR_ERROR,
-  GET_USER_SUCCESS,
-  LOGOUT
+  GET_USER_INFO_SUCCESS,
+  LOGIN_SUCCESS,
+  LOGOUT_SUCCESS,
+  RESTORE_TOKENS_SUCCESS,
+  REFRESH_TOKEN_REQUEST,
+  REFRESH_TOKEN_SUCCESS
 } from '../constants/actionTypes';
 import { getToken } from '../utils/localStorage';
 
@@ -18,7 +22,9 @@ const initialState = {
   },
   token: {
     accessToken: getToken('accessToken'),
-    refreshToken: getToken('refreshToken')
+    refreshToken: getToken('refreshToken'),
+    expiresIn: getToken('expiresIn'),
+    isRefreshing: false
   }
 };
 
@@ -26,7 +32,7 @@ export default function(state = initialState, action) {
   switch (action.type) {
     case SET_AUTH_STATUS:
       return { ...state, loggedIn: action.newAuthState };
-    case LOGOUT:
+    case LOGOUT_SUCCESS:
       return {
         ...state,
         authenticated: false,
@@ -36,15 +42,22 @@ export default function(state = initialState, action) {
       return { ...state, currentlySending: action.sending };
     case REQUEST_ERROR:
       return { ...state, error: action.error };
-    case GET_USER_SUCCESS:
+    case LOGIN_SUCCESS:
       return {
         ...state,
-        user: { name: action.data.user.name, email: action.data.user.email },
-        token: {
-          accessToken: action.data.token.accessToken,
-          refreshToken: action.data.token.refreshToken
-        }
+        ...action.data
       };
+    case GET_USER_INFO_SUCCESS:
+      return {
+        ...state,
+        user: { ...action.data }
+      };
+    case RESTORE_TOKENS_SUCCESS:
+      return { ...state, token: { ...action.data } };
+    case REFRESH_TOKEN_REQUEST:
+      return { ...state, token: { ...state.token, isRefreshing: true } };
+    case REFRESH_TOKEN_SUCCESS:
+      return { ...state, token: { ...action.data.token, isRefreshing: false } };
     case CLEAR_ERROR:
       return { ...state, error: '' };
     default:

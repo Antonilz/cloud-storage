@@ -24,11 +24,11 @@ exports.load = async (req, res, next, id) => {
  */
 exports.get = async (req, res, next) => {
   console.time('get current folder children');
-  const path = req.params[0].trim();
+  const pathSlug = req.params[0].trim();
   let rootFolder = false;
-  if (path != null && path != '') {
+  if (pathSlug != null && pathSlug != '') {
     rootFolder = await Folder.find({
-      path
+      pathSlug
     }).limit(1);
     if (rootFolder[0] == null) {
       return res.sendStatus(404);
@@ -81,7 +81,7 @@ exports.create = async (req, res, next) => {
     if (parentPath != null && parentPath != '') {
       parentFolder = await Folder.findOne(
         {
-          path: parentPath
+          pathSlug: parentPath
         },
         { _id: 1 }
       );

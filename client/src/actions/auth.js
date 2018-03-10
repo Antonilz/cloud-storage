@@ -4,10 +4,10 @@ import {
   LOGIN_REQUEST,
   LOGOUT_REQUEST,
   REGISTER_REQUEST,
-  LOGOUT,
   REQUEST_ERROR,
   CLEAR_ERROR,
-  GET_USER_REQUEST
+  GET_USER_INFO_REQUEST,
+  RESTORE_TOKENS_REQUEST
 } from '../constants/actionTypes';
 
 /**
@@ -22,8 +22,8 @@ export function setAuthState(newAuthState) {
  * Sets the current user info
  * @param  {string} token user
  */
-export function userInfoRequest(refreshToken) {
-  return { type: GET_USER_REQUEST, refreshToken };
+export function userInfoRequest() {
+  return { type: GET_USER_INFO_REQUEST };
 }
 
 /**
@@ -48,11 +48,8 @@ export function logoutRequest() {
   return { type: LOGOUT_REQUEST };
 }
 
-/**
- * Tells the app we want to log out a user
- */
-export function logout() {
-  return { type: LOGOUT };
+export function restoreTokensRequest() {
+  return { type: RESTORE_TOKENS_REQUEST };
 }
 
 /**

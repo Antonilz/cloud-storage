@@ -17,35 +17,35 @@ import {
  * Sets the current user info
  * @param  {string} token user
  */
-export function folderInfoRequest(token, path, notInitial) {
-  return { type: GET_FOLDER_REQUEST, token, path, notInitial };
+export function folderInfoRequest({ pathSlug, notInitial }) {
+  return { type: GET_FOLDER_REQUEST, pathSlug, notInitial };
 }
 
-export function searchItemsRequest(token, queryInput) {
-  return { type: SEARCH_ITEMS_REQUEST, token, queryInput };
+export function searchItemsRequest({ queryInput }) {
+  return { type: SEARCH_ITEMS_REQUEST, queryInput };
 }
 /**
  * Sets the current user info
  * @param  {string} token user
  */
-export function createFolderRequest(token, path, name) {
-  return { type: CREATE_FOLDER_REQUEST, token, path, name };
-}
-
-/**
- * Sets the current user info
- * @param  {string} token user
- */
-export function createFileRequest(token, path, file, samePath) {
-  return { type: CREATE_FILE_REQUEST, token, path, file, samePath };
+export function createFolderRequest({ path, name }) {
+  return { type: CREATE_FOLDER_REQUEST, path, name };
 }
 
 /**
  * Sets the current user info
  * @param  {string} token user
  */
-export function deleteSelectedItemsRequest(token, selectedItems) {
-  return { type: DELETE_SELECTED_ITEMS_REQUEST, token, selectedItems };
+export function createFileRequest({ path, file, samePath }) {
+  return { type: CREATE_FILE_REQUEST, path, file, samePath };
+}
+
+/**
+ * Sets the current user info
+ * @param  {string} token user
+ */
+export function deleteSelectedItemsRequest({ selectedItems }) {
+  return { type: DELETE_SELECTED_ITEMS_REQUEST, selectedItems };
 }
 
 /**

@@ -6,9 +6,10 @@ const slug = require('slug');
 const FolderSchema = new Schema(
   {
     path: { type: String, unique: true },
+    pathSlug: { type: String, unique: true },
     parentID: { type: Schema.Types.ObjectId, ref: 'folders' },
-    name: String,
-    slug: String
+    name: { type: String, required: [true, "can't be blank"] },
+    nameSlug: String
   },
   {
     timestamps: true
@@ -21,13 +22,15 @@ FolderSchema.index({ name: 'text' });
  * Pre Hooks
  */
 FolderSchema.pre('save', async function save(next) {
-  this.slug = slug(this.name);
+  this.nameSlug = slug(this.name);
   try {
     if (this.parentID == null) {
-      this.path = this.slug;
+      this.path = this.name;
+      this.pathSlug = this.nameSlug;
     } else {
       const parent = await this.constructor.get(this.parentID);
-      this.path = `${parent.path}/${this.slug}`;
+      this.path = `${parent.path}/${this.name}`;
+      this.pathSlug = `${parent.pathSlug}/${this.nameSlug}`;
     }
     if (this.isModified('name')) {
       // update all descandant nodes path
@@ -58,7 +61,15 @@ FolderSchema.pre('save', async function save(next) {
 FolderSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['id', 'name', 'path', 'parentID', 'slug', 'updatedAt'];
+    const fields = [
+      'id',
+      'name',
+      'path',
+      'parentID',
+      'nameSlug',
+      'pathSlug',
+      'updatedAt'
+    ];
 
     fields.forEach(field => {
       transformed[field] = this[field];

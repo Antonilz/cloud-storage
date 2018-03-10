@@ -27,21 +27,20 @@ class FilesViewTable extends PureComponent {
         style={{ cursor: 'pointer' }}
         active={item.checked}
       >
-        <Table.Cell width={1}>
-          <Checkbox
-            checked={item.checked}
-            onChange={(e, data) => {
-              e.stopPropagation();
-              this.props.onItemCheck(item.data.id, data.checked);
-            }}
-          />
+        <Table.Cell
+          width={1}
+          onClick={(e, data) => {
+            this.props.onItemCheck(item.data.id, !item.checked);
+          }}
+        >
+          <Checkbox checked={item.checked} />
         </Table.Cell>
         <Table.Cell width={6} singleLine collapsing>
           <div
             style={{ width: 'fit-content' }}
             onClick={e => {
               e.stopPropagation();
-              this.props.onFolderClick(this.props.token, item.data.path, true);
+              this.props.onFolderClick({ pathSlug: item.data.pathSlug });
             }}
           >
             <Icon
@@ -89,7 +88,7 @@ class FilesViewTable extends PureComponent {
                     icon="delete"
                     text="Delete"
                     onClick={(e, data) => {
-                      this.props.deleteSelectedItems(this.props.token, [item]);
+                      this.props.deleteSelectedItems([item]);
                     }}
                   />
                   <Dropdown.Item icon="cut" text="Cut" />
@@ -116,13 +115,7 @@ class FilesViewTable extends PureComponent {
           </Dimmer>
         )}
         {items.children.length > 0 && (
-          <Table
-            selectable
-            padded
-            unstackable
-            columns={5}
-            className="storage__files-view__table"
-          >
+          <Table selectable padded unstackable columns={5}>
             <Table.Header>
               <Table.Row>
                 <Table.HeaderCell>

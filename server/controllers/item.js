@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { omit } = require('lodash');
 const aws = require('aws-sdk');
+const Minio = require('minio');
 const Folder = require('../models/Folder');
 const File = require('../models/File');
 const { handler: errorHandler } = require('../middlewares/error');
@@ -64,28 +65,35 @@ exports.update = async (req, res, next) => {
  */
 exports.delete = async (req, res, next) => {
   const items = req.body.items;
-
+  const minioClient = new Minio.Client({
+    //endPoint: 'play.minio.io',
+    endPoint: '127.0.0.1',
+    port: 10000,
+    secure: true,
+    accessKey: keys.storageAccessKey,
+    secretKey: keys.storageSecretAccessKey
+  });
   items.forEach(async item => {
     if (item.type === 'file') {
       const file = await File.get(item.data.id);
 
       aws.config.region = 'eu-central-1';
-      //aws.confg.endpoint = 'https://play.minio.io:9000';
-      //aws.config.accessKeyId = keys.storageAccessKey;
-      //aws.config.secretAccessKey = keys.storageSecretAccessKey;
       const s3 = new aws.S3({
         signatureVersion: 'v4',
-        endpoint: 'https://play.minio.io:9000',
+        //endpoint: 'https://play.minio.io:9000',
+        endpoint: 'https://127.0.0.1:10000',
+        sslEnabled: false,
         s3ForcePathStyle: true,
         accessKeyId: keys.storageAccessKey,
         secretAccessKey: keys.storageSecretAccessKey
       });
+
       const params = {
-        Bucket: keys.bucket,
+        Bucket: keys.bucketName,
         Key: file.uuid
       };
-      s3.deleteObject(params, async (err, data) => {
-        console.log(data);
+      console.log(keys.bucketName);
+      minioClient.removeObject(params.Bucket, params.Key, async (err, data) => {
         if (err) {
           console.log(err);
           return res.status(500, 'Cannot delete items');

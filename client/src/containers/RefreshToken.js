@@ -1,12 +1,12 @@
 import { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { userInfoRequest } from '../actions/auth';
+import { userInfoRequest, restoreTokensRequest } from '../actions/auth';
 import { checkToken, getToken } from '../utils/localStorage';
 
 class RefreshToken extends PureComponent {
-  componentDidMount() {
-    checkToken('refreshToken') &&
-      this.props.userInfoRequest(getToken('refreshToken'));
+  componentWillMount() {
+    console.log('refresh');
+    checkToken('refreshToken') && this.props.restoreTokensRequest();
   }
 
   render() {
@@ -14,4 +14,6 @@ class RefreshToken extends PureComponent {
   }
 }
 
-export default connect(null, { userInfoRequest })(RefreshToken);
+export default connect(null, { userInfoRequest, restoreTokensRequest })(
+  RefreshToken
+);

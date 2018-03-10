@@ -10,6 +10,8 @@ node_modules
 /build
 /client/build
 /server/config/dev.js
+/server/config/private.key
+/server/config/public.crt
 
 # misc
 .DS_Store

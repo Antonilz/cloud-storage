@@ -18,7 +18,8 @@ const initialState = {
   error: '',
   currentFolder: {
     name: '',
-    path: ''
+    path: '',
+    pathSlug: ''
   },
   children: [],
   uploads: [],

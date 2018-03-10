@@ -18,7 +18,7 @@ export default class SearchItemsInput extends PureComponent {
     });
     //if (this.state.value.length < 1) return this.resetComponent();
     if (value.length > 0) {
-      this.props.handleSearchChange(this.props.token, value);
+      this.props.handleSearchChange({ queryInput: value });
       this.setState({
         isLoading: false
         //results: filteredResults
@@ -73,11 +73,11 @@ export default class SearchItemsInput extends PureComponent {
   );
 
   render() {
-    const { isLoading, value } = this.state;
+    const { value } = this.state;
     return (
       <Search
         fluid
-        loading={isLoading}
+        loading={this.props.isFetching}
         //onResultSelect={this.handleResultSelect}
         onSearchChange={this.handleSearchChange}
         resultRenderer={this.resultRenderer}

@@ -16,7 +16,7 @@ class UploadToMinio extends PureComponent {
       type: info.file.type === '' ? mime.lookup(info.file.name) : info.file.type
     };
     const samePath = this.props.path == info.file.path;
-    this.props.createFile(this.props.token, info.file.path, file, samePath);
+    this.props.createFile({ path: info.file.path, file, samePath });
   };
 
   renderUploadProgress({ progress, files }) {

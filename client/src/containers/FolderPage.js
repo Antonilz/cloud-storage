@@ -11,7 +11,6 @@ import FilesView from '../components/FilesView';
 import SearchItemsInput from '../components/SearchItemsInput';
 import UploadToMinio from './UploadToMinio';
 import Gallery from './Gallery';
-import { getToken } from '../utils/localStorage';
 
 import { selectSortedStorage, selectSearchResults } from '../selectors';
 import {
@@ -25,15 +24,16 @@ import {
   sortItems,
   changeView
 } from '../actions/storage';
-import { logoutRequest } from '../actions/auth';
+import { logoutRequest, userInfoRequest } from '../actions/auth';
 
 class FolderPage extends Component {
   componentDidMount() {
-    const path = this.props.location.pathname.replace(
+    const pathSlug = this.props.location.pathname.replace(
       /\/storage.|\/storage/,
       ''
     );
-    this.props.folderInfoRequest(getToken('accessToken'), path, false);
+    this.props.userInfoRequest();
+    this.props.folderInfoRequest({ pathSlug, notInitial: false });
   }
 
   componentDidUpdate(prevProps) {
@@ -42,31 +42,35 @@ class FolderPage extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillUpdate(nextProps) {
     if (nextProps.location.pathname !== this.props.location.pathname) {
-      const path = nextProps.location.pathname.replace(
+      const pathSlug = nextProps.location.pathname.replace(
         /\/storage.|\/storage/,
         ''
       );
-      this.props.folderInfoRequest(getToken('accessToken'), path, false);
+      this.props.folderInfoRequest({ pathSlug, notInitial: false });
     }
   }
 
   createFolder = ({ name }) => {
     const path = this.props.items.currentFolder.path;
-    this.props.createFolderRequest(getToken('accessToken'), path, name);
+    this.props.createFolderRequest({ path, name });
   };
 
   updateItemDetails = ({ details }) => {
     const path = this.props.items.currentFolder.path;
-    this.props.createFolderRequest(getToken('accessToken'), path, details);
+    this.props.createFolderRequest({ path, details });
+  };
+
+  changeFolder = ({ pathSlug }) => {
+    const cleanPath = pathSlug.replace(/\/storage.|\/storage/, '');
+    this.props.history.push(`/storage/${cleanPath}`);
   };
 
   deleteSelectedItems = () => {
-    this.props.deleteSelectedItemsRequest(
-      getToken('accessToken'),
-      this.props.items.children.filter(item => item.checked)
-    );
+    this.props.deleteSelectedItemsRequest({
+      selectedItems: this.props.items.children.filter(item => item.checked)
+    });
   };
 
   render() {
@@ -93,12 +97,12 @@ class FolderPage extends Component {
               handleSearchChange={this.props.searchItemsRequest}
               onFolderClick={this.props.folderInfoRequest}
               searchResults={this.props.searchResults}
-              token={this.props.auth.token.accessToken}
+              isFetching={this.props.searchIsFetching}
             />
             <NavigationBreadcrumbs
-              path={this.props.location.pathname}
-              onFolderClick={this.props.folderInfoRequest}
-              token={this.props.auth.token.accessToken}
+              path={this.props.items.currentFolder.path}
+              pathSlug={this.props.items.currentFolder.pathSlug}
+              onFolderClick={this.changeFolder}
             />
             <StorageActionsMenu
               onDeleteSelectedItemsClick={this.deleteSelectedItems}
@@ -109,6 +113,7 @@ class FolderPage extends Component {
               handleChangeSortOptions={this.props.sortItems}
               sortOptions={this.props.items.sortOptions}
               currentView={this.props.items.view}
+              path={this.props.location.pathname}
             />
           </Container>
         </div>
@@ -122,11 +127,10 @@ class FolderPage extends Component {
             <FilesView
               items={this.props.items}
               history={this.props.history}
-              onFolderClick={this.props.folderInfoRequest}
+              onFolderClick={this.changeFolder}
               onItemCheck={this.props.toggleItem}
               onItemsCheck={this.props.toggleAllItems}
               deleteSelectedItems={this.props.deleteSelectedItemsRequest}
-              token={this.props.auth.token.accessToken}
             />
           </UploadToMinio>
         </Container>
@@ -138,6 +142,7 @@ class FolderPage extends Component {
 const mapStateToProps = state => ({
   auth: state.auth,
   searchResults: selectSearchResults(state),
+  searchIsFetching: state.storage.search.isFetching,
   items: selectSortedStorage(state)
 });
 
@@ -152,6 +157,7 @@ export default withRouter(
     toggleItem,
     toggleAllItems,
     sortItems,
-    changeView
+    changeView,
+    userInfoRequest
   })(FolderPage)
 );
