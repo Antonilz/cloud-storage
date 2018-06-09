@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 const crypto = require('crypto');
-const { omitBy, isNil } = require('lodash');
 const bcrypt = require('bcryptjs');
 const httpStatus = require('http-status');
 const moment = require('moment-timezone');
 const jwt = require('jwt-simple');
 const { secret } = require('../config/keys');
 const { jwtExpirationInterval } = require('../config/keys');
+
 const env = 'test';
 const roles = ['user', 'admin'];
 
@@ -15,11 +15,9 @@ const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      lowercase: true,
       unique: true,
       required: [true, "can't be blank"],
       match: [/^[a-zA-Z0-9]+$/, 'username is invalid']
-      //index: true
     },
     email: {
       type: String,
@@ -63,9 +61,6 @@ UserSchema.pre('save', async function save(next) {
   }
 });
 
-/**
- * Methods
- */
 UserSchema.method({
   transform() {
     const transformed = {};
@@ -94,9 +89,6 @@ UserSchema.method({
   }
 });
 
-/**
- * Statics
- */
 UserSchema.statics = {
   roles,
 
@@ -156,7 +148,7 @@ UserSchema.statics = {
     } else {
       err.message = 'Incorrect email or refreshToken';
     }
-    throw new APIError(err);
+    throw new Error(err);
   },
 
   /**
@@ -164,10 +156,9 @@ UserSchema.statics = {
    * if error is a mongoose duplicate key error
    *
    * @param {Error} error
-   * @returns {Error|APIError}
+   * @returns {Error}
    */
   checkDuplicateEmail(error) {
-    console.log(error);
     if (error.name === 'MongoError' && error.code === 11000) {
       return new Error({
         message: 'Validation Error',
@@ -183,7 +174,6 @@ UserSchema.statics = {
         stack: error.stack
       });
     }
-    return error;
   }
 };
 

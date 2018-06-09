@@ -1,20 +1,19 @@
 import React, { PureComponent } from 'react';
-import { separateLink } from '../utils/separateLink';
 import { Menu, Icon } from 'semantic-ui-react';
+import styled from 'styled-components';
 import MoreActionsButton from './MoreActionsButton';
 import FolderCreatePopup from './FolderCreatePopup';
 import ItemsSortOptions from './ItemsSortOptions';
 
-class StorageActionsMenu extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.handleChangeViewClick = this.handleChangeViewClick.bind(this);
-  }
+const StyledViewTypeSelector = styled(Menu.Item)`
+  color: ${props => (props.active ? 'rgba(40, 40, 40, 0.3)' : 'black')};
+`;
 
-  handleChangeViewClick(e, data) {
+class StorageActionsMenu extends PureComponent {
+  handleChangeViewClick = (e, data) => {
     e.preventDefault;
     this.props.onChangeViewClick(data.value);
-  }
+  };
 
   render() {
     return (
@@ -31,6 +30,7 @@ class StorageActionsMenu extends PureComponent {
           {this.props.numOfSelectedItems > 0 && (
             <Menu.Item
               onDeleteSelectedItemsClick={this.props.onDeleteSelectedItemsClick}
+              onTagsEditClick={this.props.onTagsEditClick}
               numOfSelectedItems={this.props.numOfSelectedItems}
               hasBufferedItems={false}
               as={MoreActionsButton}
@@ -43,14 +43,16 @@ class StorageActionsMenu extends PureComponent {
             sortOptions={this.props.sortOptions}
             changeSortOptions={this.props.handleChangeSortOptions}
           />
-          <Menu.Item
-            active={this.props.currentView === 'table'}
+          <StyledViewTypeSelector
+            //active={this.props.currentView === 'list'}
+            disabled={this.props.currentView === 'list'}
             icon="list layout"
-            value="table"
+            value="list"
             onClick={this.handleChangeViewClick}
           />
-          <Menu.Item
-            active={this.props.currentView === 'grid'}
+          <StyledViewTypeSelector
+            //active={this.props.currentView === 'grid'}
+            disabled={this.props.currentView === 'grid'}
             icon="grid layout"
             value="grid"
             onClick={this.handleChangeViewClick}

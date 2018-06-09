@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Icon, Dropdown, Checkbox, Form, Radio } from 'semantic-ui-react';
+import { Dropdown, Form, Radio, Divider } from 'semantic-ui-react';
 
 class ItemsSortOptions extends PureComponent {
   handleChange = (e, data) => {
@@ -21,7 +21,7 @@ class ItemsSortOptions extends PureComponent {
         <Dropdown.Menu>
           <Dropdown.Header>Sort By</Dropdown.Header>
           <Form>
-            <Dropdown.Item>
+            <Dropdown.Item active={fieldName === 'name'}>
               <Form.Field
                 control={Radio}
                 label="Name"
@@ -31,7 +31,7 @@ class ItemsSortOptions extends PureComponent {
                 onChange={this.handleChange}
               />
             </Dropdown.Item>
-            <Dropdown.Item>
+            <Dropdown.Item active={fieldName === 'updatedAt'}>
               <Form.Field
                 control={Radio}
                 label="Last Modified"
@@ -41,7 +41,7 @@ class ItemsSortOptions extends PureComponent {
                 onChange={this.handleChange}
               />
             </Dropdown.Item>
-            <Dropdown.Item>
+            <Dropdown.Item active={fieldName === 'size'}>
               <Form.Field
                 control={Radio}
                 label="Size"
@@ -51,29 +51,27 @@ class ItemsSortOptions extends PureComponent {
                 onChange={this.handleChange}
               />
             </Dropdown.Item>
-            <Dropdown.Divider />
-            <Form.Group>
-              <Dropdown.Item>
-                <Form.Field
-                  control={Radio}
-                  label="Ascending"
-                  name="sortOrderGroup"
-                  checked={order === 'asc'}
-                  onChange={this.handleChange}
-                  value="asc"
-                />
-              </Dropdown.Item>
-              <Dropdown.Item>
-                <Form.Field
-                  control={Radio}
-                  label="Descending"
-                  name="sortOrderGroup"
-                  checked={order === 'desc'}
-                  onChange={this.handleChange}
-                  value="desc"
-                />
-              </Dropdown.Item>
-            </Form.Group>
+            <Divider fitted />
+            <Dropdown.Item active={order === 'asc'}>
+              <Form.Field
+                control={Radio}
+                label="Ascending"
+                name="sortOrderGroup"
+                checked={order === 'asc'}
+                onChange={this.handleChange}
+                value="asc"
+              />
+            </Dropdown.Item>
+            <Dropdown.Item active={order === 'desc'}>
+              <Form.Field
+                control={Radio}
+                label="Descending"
+                name="sortOrderGroup"
+                checked={order === 'desc'}
+                onChange={this.handleChange}
+                value="desc"
+              />
+            </Dropdown.Item>
           </Form>
         </Dropdown.Menu>
       </Dropdown>

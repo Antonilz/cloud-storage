@@ -1,5 +1,3 @@
-//import { hashSync } from 'bcryptjs';
-//import genSalt from '../auth/salt';
 import {
   take,
   call,
@@ -20,12 +18,13 @@ import {
   SENDING_REQUEST,
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
+  LOGIN_FAILURE,
   LOGOUT_REQUEST,
   LOGOUT_SUCCESS,
   REGISTER_REQUEST,
-  SET_AUTH_STATUS,
+  REGISTER_SUCCESS,
+  REGISTER_FAILURE,
   REQUEST_ERROR,
-  CLEAR_ERROR,
   GET_USER_INFO_SUCCESS,
   GET_USER_INFO_REQUEST,
   GET_USER_INFO_FAILURE,
@@ -36,48 +35,6 @@ import {
   RESTORE_TOKENS_SUCCESS
 } from '../constants/actionTypes';
 
-/**
- * Effect to handle authorization
- * @param  {string} username               The username of the user
- * @param  {string} password               The password of the user
- * @param  {object} options                Options
- * @param  {boolean} options.isRegistering Is this a register request?
- */
-export function* authorize({ email, password, isRegistering }) {
-  yield put({ type: CLEAR_ERROR });
-  yield put({ type: SENDING_REQUEST, sending: true });
-
-  // We then try to register or log in the user, depending on the request
-  try {
-    //const salt = genSalt(username);
-    //const hash = hashSync(password, salt);
-    let response;
-    if (isRegistering) {
-      response = yield call(
-        axios.post,
-        `${API_URL}/auth/register`,
-        email,
-        password
-      );
-    } else {
-      response = yield call(axios.post, `${API_URL}/auth/login`, {
-        email,
-        password
-      });
-    }
-    return response;
-  } catch (error) {
-    yield put({ type: REQUEST_ERROR, error: error.message });
-
-    return false;
-  } finally {
-    yield put({ type: SENDING_REQUEST, sending: false });
-  }
-}
-
-/**
- * Effect to handle logging out
- */
 export function* logout() {
   yield put({ type: SENDING_REQUEST, sending: true });
   try {
@@ -90,62 +47,44 @@ export function* logout() {
   }
 }
 
-/**
- * Log in saga
- */
-export function* loginFlow() {
-  while (true) {
-    const request = yield take(LOGIN_REQUEST);
-    const { email, password } = request.data;
-    const winner = yield race({
-      auth: call(authorize, { email, password, isRegistering: false }),
-      logout: take(LOGOUT_REQUEST)
-    });
-
-    if (winner.auth) {
-      setToken('accessToken', winner.auth.data.token.accessToken);
-      setToken('refreshToken', winner.auth.data.token.refreshToken);
-      setToken('expiresIn', winner.auth.data.token.expiresIn);
-      yield put({ type: SET_AUTH_STATUS, status: true });
-      yield put({ type: LOGIN_SUCCESS, data: winner.auth.data });
-      yield put(push('/storage'));
-    }
-  }
-}
-
-/**
- * Log out saga
- */
-export function* logoutFlow() {
-  while (true) {
-    yield take(LOGOUT_REQUEST);
-    deleteToken('refreshToken');
-    deleteToken('accessToken');
-    deleteToken('expiresIn');
-    yield put({ type: SET_AUTH_STATUS, newAuthState: true });
-    // yield call(logout);
-    yield put({ type: LOGOUT_SUCCESS });
-    yield put(push('/login'));
-  }
-}
-
-/**
- * Register saga
- */
-export function* registerFlow() {
-  while (true) {
-    const request = yield take(REGISTER_REQUEST);
-    const { email, password } = request.data;
-    const wasSuccessful = yield call(authorize, {
+export function* register({ email, login, password }) {
+  try {
+    const response = yield call(axios.post, `${API_URL}/auth/register`, {
       email,
-      password,
-      isRegistering: true
+      name: login,
+      password
     });
-
-    if (wasSuccessful) {
-      yield put({ type: SET_AUTH_STATUS, newAuthState: true });
-      yield put(push('/storage'));
+    if (response) {
+      setToken('accessToken', response.data.token.accessToken);
+      setToken('refreshToken', response.data.token.refreshToken);
+      setToken('expiresIn', response.data.token.expiresIn);
+      yield put({ type: REGISTER_SUCCESS, data: response.data });
+      yield put(push('/storage/home'));
     }
+  } catch (error) {
+    yield put({ type: REGISTER_FAILURE, error: error.message });
+    return false;
+  }
+}
+
+export function* login({ email, password }) {
+  try {
+    console.log(email, password);
+    const response = yield call(axios.post, `${API_URL}/auth/login`, {
+      email,
+      password
+    });
+    if (response) {
+      console.log(response);
+      setToken('accessToken', response.data.token.accessToken);
+      setToken('refreshToken', response.data.token.refreshToken);
+      setToken('expiresIn', response.data.token.expiresIn);
+      yield put({ type: LOGIN_SUCCESS, data: response.data });
+      yield put(push('/storage/home'));
+    }
+  } catch (error) {
+    yield put({ type: LOGIN_FAILURE, error: error.message });
+    return false;
   }
 }
 
@@ -217,10 +156,6 @@ export function* restoreTokens() {
   }
 }
 
-export function* restoreTokensFlow() {
-  yield takeLatest(RESTORE_TOKENS_REQUEST, restoreTokens);
-}
-
 export function* getUserInfo() {
   const { accessToken } = yield select(selectTokensData);
   try {
@@ -238,11 +173,32 @@ export function* getUserInfo() {
   }
 }
 
-/**
- * Get user info saga
- */
+export function* logoutFlow() {
+  while (true) {
+    yield take(LOGOUT_REQUEST);
+    deleteToken('refreshToken');
+    deleteToken('accessToken');
+    deleteToken('expiresIn');
+    // yield call(logout);
+    yield put({ type: LOGOUT_SUCCESS });
+    yield put(push('/auth/login'));
+  }
+}
+
 export function* getUserInfoFlow() {
   yield takeLatest(GET_USER_INFO_REQUEST, authedSaga(getUserInfo));
+}
+
+export function* registerFlow() {
+  yield takeLatest(REGISTER_REQUEST, register);
+}
+
+export function* loginFlow() {
+  yield takeLatest(LOGIN_REQUEST, login);
+}
+
+export function* restoreTokensFlow() {
+  yield takeLatest(RESTORE_TOKENS_REQUEST, restoreTokens);
 }
 
 export default function* authSagas() {

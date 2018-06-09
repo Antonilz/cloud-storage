@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Popup, Menu, Icon } from 'semantic-ui-react';
-import FolderCreateForm from '../containers/FolderCreateForm';
+import FolderCreateForm from '../forms/FolderCreateForm';
 
 const FolderCreatePopup = ({ onSubmitAction, path }) => (
   <Popup
@@ -11,6 +11,10 @@ const FolderCreatePopup = ({ onSubmitAction, path }) => (
     }
     content={<FolderCreateForm path={path} createFolder={onSubmitAction} />}
     on="click"
+    onOpen={(event, data) => {
+      window.scrollTo(0, 0);
+    }}
+    style={{ position: 'fixed' }}
     position="bottom left"
   />
 );

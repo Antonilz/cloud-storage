@@ -26,28 +26,36 @@ router
   .route('/items/delete')
   .post(authorize(LOGGED_USER), itemController.delete);
 router
-  .route('/items/search/*')
-  .get(authorize(LOGGED_USER), itemController.search);
+  .route('/items/search')
+  .post(authorize(LOGGED_USER), itemController.search);
 
 router
   .route('/s3/sign')
   .get(authorize(LOGGED_USER), awsController.getSignedUploadLink);
 
 // link amazon s3 uuid to DB model
-router.route('/files/*').post(authorize(LOGGED_USER), fileController.create);
-/*router
-  .route('/file/:id')
-  .get(authorize(LOGGED_USER), awsController.getSignedDownloadLink);
-// update file info (tags, path, permissions, etc.)
 router
-  .route('files/:fileID')
-  .patch(authorize(LOGGED_USER), fileController.update);
+  .route('/files/create')
+  .post(authorize(LOGGED_USER), fileController.create);
+router
+  .route('/files/get-urls')
+  .post(authorize(LOGGED_USER), fileController.getDownloadURLs);
 
-// update tags of array of items
 router
   .route('/items/update')
   .post(authorize(LOGGED_USER), itemController.update);
-// upload new file(s)
-*/
+router
+  .route('/items/addTag')
+  .post(authorize(LOGGED_USER), itemController.addTag);
+router
+  .route('/items/deleteTag')
+  .post(authorize(LOGGED_USER), itemController.deleteTag);
+router
+  .route('/items/searchTags')
+  .post(authorize(LOGGED_USER), itemController.searchTags);
+
+router
+  .route('/items/filterByTags')
+  .post(authorize(LOGGED_USER), itemController.filterByTags);
 
 module.exports = router;

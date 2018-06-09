@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Field, reduxForm } from 'redux-form';
 import { Form, Label } from 'semantic-ui-react';
-import { createFolderRequest } from '../actions/storage'; // importing our
+import { createFolderRequest } from 'actions/storage'; // importing our
 
 const required = value => (value && value.length > 0 ? undefined : 'Required');
 
@@ -43,11 +43,11 @@ class FolderCreateForm extends Component {
       );
     });
   render() {
-    const { handleSubmit, pristine, submitting, error, loading } = this.props;
+    const { handleSubmit, pristine, submitting, error } = this.props;
     const submit = handleSubmit(this.submit);
     return (
-      <Form onSubmit={submit} loading={loading}>
-        <Form.Group>
+      <Form onSubmit={submit} loading={submitting}>
+        <Form.Group inline>
           <Field
             name="name"
             type="text"

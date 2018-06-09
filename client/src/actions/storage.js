@@ -6,99 +6,95 @@ import {
   REQUEST_ERROR,
   CLEAR_ERROR,
   TOGGLE_ITEM,
+  TOGGLE_ITEM_RENAME,
+  TOGGLE_TAGS_EDIT,
+  RENAME_ITEM_REQUEST,
   TOGGLE_ALL_ITEMS,
   SORT_ITEMS,
   CHANGE_VIEW,
   CREATE_FILE_REQUEST,
-  SEARCH_ITEMS_REQUEST
+  SEARCH_ITEMS_REQUEST,
+  SEARCH_TAGS_REQUEST,
+  ADD_TAG_REQUEST,
+  ADD_FILTER_TAG,
+  DELETE_FILTER_TAG,
+  DELETE_TAG_REQUEST,
+  DOWNLOAD_FILE,
+  FILTER_ITEMS_BY_TAGS_REQUEST
 } from '../constants/actionTypes';
 
-/**
- * Sets the current user info
- * @param  {string} token user
- */
 export function folderInfoRequest({ pathSlug, notInitial }) {
   return { type: GET_FOLDER_REQUEST, pathSlug, notInitial };
 }
 
-export function searchItemsRequest({ queryInput }) {
-  return { type: SEARCH_ITEMS_REQUEST, queryInput };
+export function searchItemsRequest({ query }) {
+  return { type: SEARCH_ITEMS_REQUEST, query };
 }
-/**
- * Sets the current user info
- * @param  {string} token user
- */
+
 export function createFolderRequest({ path, name }) {
   return { type: CREATE_FOLDER_REQUEST, path, name };
 }
 
-/**
- * Sets the current user info
- * @param  {string} token user
- */
-export function createFileRequest({ path, file, samePath }) {
-  return { type: CREATE_FILE_REQUEST, path, file, samePath };
+export function toggleItemRename({ id, status }) {
+  return { type: TOGGLE_ITEM_RENAME, id, status };
 }
 
-/**
- * Sets the current user info
- * @param  {string} token user
- */
+export function toggleTagsEdit({ ids, status }) {
+  return { type: TOGGLE_TAGS_EDIT, ids, status };
+}
+
+export function addTagToItems({ itemsIds, tagName }) {
+  return { type: ADD_TAG_REQUEST, itemsIds, tagName };
+}
+
+export function deleteTagFromItems({ itemsIds, tagId }) {
+  return { type: DELETE_TAG_REQUEST, itemsIds, tagId };
+}
+
+export function addFilterTag({ id }) {
+  return { type: ADD_FILTER_TAG, id };
+}
+
+export function deleteFilterTag({ id }) {
+  return { type: DELETE_FILTER_TAG, id };
+}
+
+export function createFileRequest({ pathSlug, file, samePath }) {
+  return { type: CREATE_FILE_REQUEST, pathSlug, file, samePath };
+}
+
 export function deleteSelectedItemsRequest({ selectedItems }) {
   return { type: DELETE_SELECTED_ITEMS_REQUEST, selectedItems };
 }
 
-/**
- * Sets the `currentlySending` state, which displays a loading indicator during requests
- * @param  {boolean} sending True means we're sending a request, false means we're not
- */
-export function sendingRequest(sending) {
-  return { type: SENDING_REQUEST, sending };
+export function renameItemRequest({ item, name }) {
+  return { type: RENAME_ITEM_REQUEST, item, name };
 }
 
-/**
- * Sets the `currentlySending` state, which displays a loading indicator during requests
- * @param  {boolean} sending True means we're sending a request, false means we're not
- */
 export function toggleItem(id, status) {
   return { type: TOGGLE_ITEM, id, status };
 }
 
-/**
- * Sets the `currentlySending` state, which displays a loading indicator during requests
- * @param  {boolean} sending True means we're sending a request, false means we're not
- */
+export function getItemsByTagsFilter(ids) {
+  return { type: FILTER_ITEMS_BY_TAGS_REQUEST, ids };
+}
+
 export function toggleAllItems(status) {
   return { type: TOGGLE_ALL_ITEMS, status };
 }
 
-/**
- * Sets the `currentlySending` state, which displays a loading indicator during requests
- * @param  {boolean} sending True means we're sending a request, false means we're not
- */
 export function sortItems(sortOptions) {
   return { type: SORT_ITEMS, sortOptions };
 }
 
-/**
- * Sets the `currentlySending` state, which displays a loading indicator during requests
- * @param  {boolean} sending True means we're sending a request, false means we're not
- */
 export function changeView(viewName) {
   return { type: CHANGE_VIEW, viewName };
 }
 
-/**
- * Sets the `error` state to the error received
- * @param  {object} error The error we got when trying to make the request
- */
-export function requestError(error) {
-  return { type: REQUEST_ERROR, error };
+export function searchTagsRequest({ query }) {
+  return { type: SEARCH_TAGS_REQUEST, query };
 }
 
-/**
- * Sets the `error` state as empty
- */
-export function clearError() {
-  return { type: CLEAR_ERROR };
+export function downloadFile({ id, url, disposition }) {
+  return { type: DOWNLOAD_FILE, id, url, disposition };
 }

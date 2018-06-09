@@ -15,64 +15,13 @@ function checkTrailingSlash(path) {
  * Returns an object with `signedUrl` and `publicUrl` properties that
  * give temporary access to PUT an object in an S3 bucket.
  */
-exports.getSignedDownloadLink = async (req, res) => {
-  const filename = req.params.id;
-  const fileKey = checkTrailingSlash('') + filename;
-
-  const minioClient = new Minio.Client({
-    endPoint: 'play.minio.io',
-    port: 9000,
-    secure: true,
-    accessKey: keys.storageAccessKey,
-    secretKey: keys.storageSecretAccessKey
-  });
-
-  const params = {
-    bucketName: keys.bucketName,
-    objectName: filename
-  };
-  minioClient.presignedPutObject(params, function(err, presignedUrl) {
-    if (err) return console.log(err);
-    res.json({
-      signedUrl: presignedUrl,
-      filename: filename,
-      fileKey: fileKey
-    });
-  });
-
-  /*
-    aws.config.region = 'eu-central-1';
-    aws.config.accessKeyId = keys.storageAccessKey;
-    aws.config.secretAccessKey = keys.storageSecretAccessKey;
-    const s3 = new aws.S3({
-        signatureVersion: 'v4'
-    });
-    const params = {
-        Bucket: 'mpei-fs',
-        Key: filename,
-        ResponseContentDisposition: contentDisposition(filename)
-    };
-    s3.getSignedUrl('getObject', params, function(err, data) {
-        if (err) {
-            return res.status(500, 'Cannot create S3 signed URL');
-        }
-        res.json({
-            signedUrl: data,
-            filename: filename,
-            fileKey: fileKey
-        });
-    });*/
-};
-
-/**
- * Returns an object with `signedUrl` and `publicUrl` properties that
- * give temporary access to PUT an object in an S3 bucket.
- */
 exports.getSignedUploadLink = async (req, res) => {
   const filename = req.query.objectName;
+  console.log(filename);
+  const folderPath = req.query.folder;
   const mimeType = req.query.contentType;
-  const fileKey = uuidv4(filename); // create unique name
-
+  //const fileKey = uuidv4(filename); // create unique name
+  const fileKey = `${folderPath === '' ? '' : folderPath + '/'}${filename}`;
   /*const s3 = new aws.S3({
         signatureVersion: 'v4',
         region: 'us-east-1',

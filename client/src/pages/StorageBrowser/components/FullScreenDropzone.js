@@ -1,9 +1,8 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import Dropzone from 'react-dropzone';
 import S3Upload from 'react-s3-uploader/s3upload';
-import { Grid, Header, Progress } from 'semantic-ui-react';
 
-class FullScreenDropzone extends Component {
+class FullScreenDropzone extends PureComponent {
   static defaultProps = {
     upload: {},
     className: 'react-dropzone-s3-uploader',

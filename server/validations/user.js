@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const roles = ['user', 'admin'];
+
 module.exports = {
   // GET api/users
   listUsers: {
@@ -31,9 +32,9 @@ module.exports = {
         .required(),
       password: Joi.string()
         .min(6)
-        .max(128)
+        .max(20)
         .required(),
-      name: Joi.string().max(128),
+      name: Joi.string().max(20),
       role: Joi.string().valid(roles)
     }
   },
@@ -46,9 +47,9 @@ module.exports = {
         .required(),
       password: Joi.string()
         .min(6)
-        .max(128)
+        .max(20)
         .required(),
-      name: Joi.string().max(128),
+      name: Joi.string().max(20),
       role: Joi.string().valid(roles)
     },
     params: {
@@ -64,8 +65,8 @@ module.exports = {
       email: Joi.string().email(),
       password: Joi.string()
         .min(6)
-        .max(128),
-      name: Joi.string().max(128),
+        .max(20),
+      name: Joi.string().max(20),
       role: Joi.string().valid(roles)
     },
     params: {

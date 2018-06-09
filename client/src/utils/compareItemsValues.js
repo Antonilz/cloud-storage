@@ -23,6 +23,8 @@ export function compareItemsValues({ fieldName, order }) {
       comparison = 1;
     } else if (firstItemValue < secondItemValue) {
       comparison = -1;
+    } else {
+      comparison = 0;
     }
 
     return order == 'desc' ? comparison * -1 : comparison;

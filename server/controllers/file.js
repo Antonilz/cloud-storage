@@ -8,30 +8,58 @@ const httpStatus = require('http-status');
  */
 exports.create = async (req, res, next) => {
   try {
-    const parentPath = req.params[0].trim();
+    const { pathSlug, fileData } = req.body;
     let parentFolder = null;
-    if (parentPath != null && parentPath != '') {
+    if (pathSlug != null && pathSlug != '') {
       parentFolder = await Folder.findOne(
         {
-          pathSlug: parentPath
+          pathSlug
         },
         { _id: 1 }
       );
     }
-    const fileData = {
-      ...req.body,
-      path: parentPath ? parentPath : '',
+    const file = {
+      ...fileData,
+      pathSlug: pathSlug ? pathSlug : '',
       parentID: parentFolder ? parentFolder._id : null
     };
-    const file = new File(fileData);
-    const savedFile = await file.save();
+    const newFile = new File(file);
+    const savedFile = await newFile.save();
     res.status(httpStatus.CREATED);
     const fileURL = await savedFile.getDownloadLink();
-    res.json({
+    return res.json({
       type: 'file',
-      data: { ...savedFile.transform(), url: fileURL }
+      data: {
+        ...savedFile.transform(),
+        inlineURL: fileURL.inlineURL,
+        attachmentURL: fileURL.attachmentURL
+      }
     });
   } catch (error) {
+    console.log(error);
     next(File.checkDuplicateFile(error));
+  }
+};
+
+exports.getDownloadURLs = async (req, res, next) => {
+  const { ids } = req.body;
+
+  try {
+    const files = await File.find({ _id: { $in: ids } });
+    const filesURLs = await Promise.all(
+      files.map(async file => await file.getDownloadLink())
+    );
+    return res.json(
+      files.map((file, index) => {
+        return {
+          id: file.id,
+          inlineURL: filesURLs[index].inlineURL,
+          attachmentURL: filesURLs[index].attachmentURL
+        };
+      })
+    );
+  } catch (e) {
+    console.log(e);
+    return res.sendStatus(404);
   }
 };

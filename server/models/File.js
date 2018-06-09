@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
-const aws = require('aws-sdk');
-const Minio = require('minio');
 const { Schema } = mongoose;
 const slug = require('slug');
 const contentDisposition = require('content-disposition');
 const httpStatus = require('http-status');
+const moment = require('moment');
+const { getSignedDownloadLink, deleteObject } = require('../services/minio');
+const { formatBytes } = require('../utils/formatBytes');
 const Folder = require('./Folder');
+const Tag = require('./Tag');
 const keys = require('../config/keys');
 
 const FileSchema = new Schema(
@@ -16,32 +18,49 @@ const FileSchema = new Schema(
       required: [true, "can't be blank"],
       unique: true
     },
-    parentID: { type: Schema.Types.ObjectId, ref: 'Folder' },
+    parentID: { type: Schema.Types.ObjectId, ref: 'folders' },
     path: {
       type: String
     },
     pathSlug: {
       type: String
     },
-    tags: [{ type: String }],
+    tags: [{ type: Schema.Types.ObjectId, ref: 'tags' }],
     size: Number,
     type: String,
-    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    formattedSize: String,
+    formattedLastModified: String,
+    author: { type: mongoose.Schema.Types.ObjectId, ref: 'users' }
   },
   {
-    timestamps: true
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: function(doc, ret) {
+        delete ret._id;
+        delete ret.__v;
+        delete ret.uuid;
+        delete ret.createdAt;
+      }
+    }
   }
 );
 
-FileSchema.index({ name: 'text' });
+FileSchema.index({ parentID: 1 });
 
 /**
  * Pre Hooks
  */
 FileSchema.pre('save', async function save(next) {
   try {
+    if (this.isNew) {
+      this.formattedSize = formatBytes(this.size);
+    }
+    this.formattedLastModified = moment(this.updatedAt).format(
+      'DD/MM/YYYY HH:mm'
+    );
     if (this.parentID != null) {
-      const parentFolder = Folder.get(this.parentID);
+      const parentFolder = await Folder.get(this.parentID);
       this.path = parentFolder.path;
       this.pathSlug = parentFolder.pathSlug;
     } else {
@@ -63,10 +82,24 @@ FileSchema.pre('remove', async function save(next) {
       .count(function(err, count) {
         console.log('Number of files with same s3 link: ', count);
       });
+    await deleteObject(keys.bucketName, this.uuid);
     return next();
   } catch (error) {
     return next(error);
   }
+});
+
+FileSchema.pre('find', function() {
+  this.populate('tags');
+});
+
+FileSchema.pre('update', function save(next) {
+  this.populate('tags');
+  console.log('updating');
+  this.formattedLastModified = moment(this.updatedAt).format(
+    'DD/MM/YYYY HH:mm'
+  );
+  return next();
 });
 
 /**
@@ -83,56 +116,34 @@ FileSchema.method({
       'path',
       'pathSlug',
       'size',
+      'formattedSize',
+      'formattedLastModified',
       'type',
-      'updatedAt'
+      'updatedAt',
+      'tags'
     ];
 
     fields.forEach(field => {
       transformed[field] = this[field];
     });
-
     return transformed;
   },
 
-  getDownloadLink(disposition = 'attachment') {
-    const minioClient = new Minio.Client({
-      //endPoint: 'play.minio.io',
-      endPoint: '127.0.0.1',
-      port: 10000,
-      secure: true,
-      accessKey: keys.storageAccessKey,
-      secretKey: keys.storageSecretAccessKey
+  async getDownloadLink() {
+    const attachmentURL = await getSignedDownloadLink({
+      bucketName: keys.bucketName,
+      objectName: this.uuid,
+      fileName: this.name,
+      contentDispositionType: 'attachment'
     });
 
-    /*
-        const s3 = new aws.S3({
-            signatureVersion: 'v4',
-            region: 'us-east-1',
-            s3ForcePathStyle: true,
-            sslEnabled: false,
-            accessKeyId: keys.storageAccessKey,
-            secretAccessKey: keys.storageSecretAccessKey,
-            endpoint: keys.endpoint
-        });
-        */
-    const params = {
-      Bucket: keys.bucketName,
-      Key: this.uuid,
-      ResponseContentDisposition: contentDisposition(this.name, {
-        type: disposition // inline, attachment
-      })
-    };
-
-    return new Promise((resolve, reject) => {
-      /*s3.getSignedUrl('getObject', params, (err, url) => {
-                if (err) reject(err);
-                else resolve(url);
-            });*/
-      minioClient.presignedGetObject(params.Bucket, params.Key, (err, url) => {
-        if (err) reject(err);
-        else resolve(url);
-      });
+    const inlineURL = await getSignedDownloadLink({
+      bucketName: keys.bucketName,
+      objectName: this.uuid,
+      fileName: this.name,
+      contentDispositionType: 'inline'
     });
+    return { inlineURL, attachmentURL };
   }
 });
 
@@ -168,12 +179,50 @@ FileSchema.statics = {
   },
 
   async getChildrenNodes(parentID) {
-    return await this.find({ parentID: parentID });
+    return await this.find({
+      parentID: parentID ? mongoose.Types.ObjectId(parentID) : null
+    });
   },
 
   async getFilesByName(queryName) {
-    const nameRegEx = new RegExp(queryName, 'i');
-    return await this.find({ name: { $regex: nameRegEx } }).limit(10);
+    const nameRegEx = new RegExp(
+      queryName.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+      'i'
+    );
+    return await this.find(
+      { name: { $regex: nameRegEx } },
+      'id name path pathSlug'
+    ).limit(10);
+  },
+
+  async filterByTags({ ids }) {
+    return await this.find({
+      tags: { $all: ids.map(id => mongoose.Types.ObjectId(id)) }
+    });
+  },
+
+  async addTagNameToFiles(itemsIds, tagName) {
+    const query = {},
+      update = { expire: new Date() },
+      options = { upsert: true, new: true, setDefaultsOnInsert: true };
+    const tag = await Tag.findOneAndUpdate({ name: tagName }, update, options);
+    await this.update(
+      { _id: { $in: itemsIds } },
+      { $addToSet: { tags: tag._id } },
+      { multi: true }
+    );
+    return await this.find(
+      { _id: { $in: itemsIds } },
+      'id formattedLastModified'
+    );
+  },
+  async removeTagByIdFromFiles(itemsIds, tagId) {
+    await this.update(
+      { _id: { $in: itemsIds } },
+      { $pullAll: { tags: [{ _id: mongoose.Types.ObjectId(tagId) }] } },
+      { multi: true }
+    );
+    return await this.find({ _id: { $in: itemsIds } });
   },
 
   /**

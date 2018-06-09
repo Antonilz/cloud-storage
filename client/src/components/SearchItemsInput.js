@@ -2,27 +2,34 @@ import React, { PureComponent } from 'react';
 import { Search, Label, List, Icon, Header } from 'semantic-ui-react';
 import { getIconFromType } from '../utils/mimeCheck';
 
-export default class SearchItemsInput extends PureComponent {
-  componentWillMount() {
-    this.resetComponent();
-  }
-  resetComponent = () => this.setState({ isLoading: false, value: '' });
+export default class SearchItems extends PureComponent {
+  state = {
+    isLoading: false,
+    value: ''
+  };
 
-  handleResultSelect = (e, { result }) =>
-    this.setState({ value: result.title });
+  constructor(props) {
+    super(props);
+    this.timeout = 0;
+  }
+
+  handleResultSelect = (e, { result }) => {
+    this.props.onItemClick({ pathSlug: result.data.pathSlug });
+  };
 
   handleSearchChange = (e, { value }) => {
+    const self = this;
+    if (this.timeout) clearTimeout(this.timeout);
     this.setState({
       //isLoading: true,
       value
     });
-    //if (this.state.value.length < 1) return this.resetComponent();
+
     if (value.length > 0) {
-      this.props.handleSearchChange({ queryInput: value });
-      this.setState({
-        isLoading: false
-        //results: filteredResults
-      });
+      //this.props.handleSearchChange({ query: value });
+      this.timeout = setTimeout(() => {
+        self.props.handleSearchChange({ query: value });
+      }, 500);
     }
   };
 
@@ -78,12 +85,12 @@ export default class SearchItemsInput extends PureComponent {
       <Search
         fluid
         loading={this.props.isFetching}
-        //onResultSelect={this.handleResultSelect}
+        onResultSelect={this.handleResultSelect}
         onSearchChange={this.handleSearchChange}
         resultRenderer={this.resultRenderer}
         results={this.props.searchResults}
         value={value}
-        input={{ fluid: true }}
+        input={{ fluid: true, placeholder: 'Search' }}
         style={{ margin: '15px 0' }}
       />
     );

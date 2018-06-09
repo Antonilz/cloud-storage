@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { separateLink } from '../utils/separateLink';
+import { separateLink } from 'utils/separateLink';
 import { Table, Icon, Dropdown } from 'semantic-ui-react';
 
 class MoreActionsButton extends PureComponent {
@@ -26,7 +26,11 @@ class MoreActionsButton extends PureComponent {
           />
           <Dropdown.Divider />
           <Dropdown.Item icon="download" text="Download as .zip" />
-          <Dropdown.Item icon="tags" text="Edit tags" />
+          <Dropdown.Item
+            icon="tags"
+            text="Edit tags"
+            onClick={this.props.onTagsEditClick}
+          />
         </Dropdown.Menu>
       </Dropdown>
     );

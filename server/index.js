@@ -11,11 +11,16 @@ const cors = require('cors');
 const helmet = require('helmet');
 const session = require('express-session');
 const routes = require('./routes');
+const morgan = require('morgan');
+const path = require('path');
 
 require('./services/passport');
 
 Promise = require('bluebird'); // eslint-disable-line no-global-assign
-mongoose.connect(keys.mongoURI, { keepAlive: 1, useMongoClient: true });
+mongoose.connect(
+  keys.mongoURI,
+  { keepAlive: 1, useMongoClient: true }
+);
 
 const app = express();
 
@@ -29,6 +34,7 @@ app.use(compress());
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(morgan('dev'));
 
 app.use('/api', routes);
 
@@ -40,16 +46,14 @@ if (process.env.NODE_ENV == 'production') {
     res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
   });
 }
+
 const options = {
-  key: fs.readFileSync(
-    '/Users/antonil/code/MPEI/diploma/cloud-storage/server/config/private.key'
-  ),
-  cert: fs.readFileSync(
-    '/Users/antonil/code/MPEI/diploma/cloud-storage/server/config/public.crt'
-  ),
+  key: fs.readFileSync(path.resolve(__dirname, './config/private.key')),
+  cert: fs.readFileSync(path.resolve(__dirname, './config/public.crt')),
   requestCert: false,
   rejectUnauthorized: false
 };
+
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const server = https.createServer(options, app);

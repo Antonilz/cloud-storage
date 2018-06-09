@@ -6,6 +6,7 @@ import {
   GET_USER_INFO_SUCCESS,
   LOGIN_SUCCESS,
   LOGOUT_SUCCESS,
+  REGISTER_SUCCESS,
   RESTORE_TOKENS_SUCCESS,
   REFRESH_TOKEN_REQUEST,
   REFRESH_TOKEN_SUCCESS
@@ -43,6 +44,11 @@ export default function(state = initialState, action) {
     case REQUEST_ERROR:
       return { ...state, error: action.error };
     case LOGIN_SUCCESS:
+      return {
+        ...state,
+        ...action.data
+      };
+    case REGISTER_SUCCESS:
       return {
         ...state,
         ...action.data

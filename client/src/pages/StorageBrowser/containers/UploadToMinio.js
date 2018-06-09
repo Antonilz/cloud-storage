@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { createFileRequest } from '../actions/storage';
+import { createFileRequest } from 'actions/storage';
 import { Grid, Header, Progress, Segment } from 'semantic-ui-react';
-import { formatBytes } from '../utils/formatBytes';
-import FullScreenDropzone from './FullScreenDropzone';
-import { UPLOAD_URL } from '../constants/api';
+import { formatBytes } from 'utils/formatBytes';
+import FullScreenDropzone from '../components/FullScreenDropzone';
+import { UPLOAD_URL } from 'constants/api';
 import mime from 'mime-types';
 
 class UploadToMinio extends PureComponent {
@@ -15,8 +15,8 @@ class UploadToMinio extends PureComponent {
       size: info.file.size,
       type: info.file.type === '' ? mime.lookup(info.file.name) : info.file.type
     };
-    const samePath = this.props.path == info.file.path;
-    this.props.createFile({ path: info.file.path, file, samePath });
+    const samePath = this.props.pathSlug == info.file.path;
+    this.props.createFile({ pathSlug: info.file.path, file, samePath });
   };
 
   renderUploadProgress({ progress, files }) {
@@ -36,7 +36,7 @@ class UploadToMinio extends PureComponent {
           }}
           size="large"
         >
-          <Header as="h4" color="violet">
+          <Header as="h4" color="blue">
             {file.name}
           </Header>
           <Progress percent={progress} indicating size="medium" />
@@ -48,7 +48,6 @@ class UploadToMinio extends PureComponent {
     );
   }
   renderUploadedFile({ uploadedFile }) {
-    console.log(uploadedFile.file.name);
     return (
       <Header as="h2" color="teal">
         {uploadedFile.file.name}
@@ -64,7 +63,7 @@ class UploadToMinio extends PureComponent {
         next(file);
       },
       signingUrlHeaders: { Authorization: `Bearer ${this.props.token}` },
-      signingUrlQueryParams: { folder: this.props.path }
+      signingUrlQueryParams: { folder: this.props.pathSlug }
     };
     const s3Url = this.props.S3BucketURL;
 
@@ -72,7 +71,7 @@ class UploadToMinio extends PureComponent {
       <FullScreenDropzone
         onFinish={this.handleFinishedUpload}
         s3Url={s3Url}
-        currentPath={this.props.path}
+        currentPath={this.props.pathSlug}
         maxSize={1024 * 1024 * 100} // 100 MB file size limit
         upload={uploadOptions}
         progressComponent={this.renderUploadProgress}

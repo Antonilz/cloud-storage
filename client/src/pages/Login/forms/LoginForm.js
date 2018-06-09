@@ -1,8 +1,23 @@
 import React, { Component } from 'react';
 import { Field, reduxForm } from 'redux-form';
-import { Form, Label, Segment } from 'semantic-ui-react';
+import { Form, Segment } from 'semantic-ui-react';
+import styled from 'styled-components';
+import Validators, {
+  required,
+  email,
+  length,
+  confirmation
+} from 'redux-form-validators';
 
-const required = value => (value ? undefined : 'Required');
+const StyledFormInputWrapper = styled.div`
+  padding: 10px 0;
+`;
+
+const StyledError = styled.div`
+  color: red;
+  width: fit-content;
+  margin-left: 7px;
+`;
 
 const renderField = ({
   input,
@@ -11,7 +26,7 @@ const renderField = ({
   icon,
   meta: { touched, error, warning }
 }) => (
-  <div>
+  <StyledFormInputWrapper>
     <Form.Input
       {...input}
       placeholder={placeholder}
@@ -22,17 +37,9 @@ const renderField = ({
       style={{ marginBottom: '15px' }}
     />
     {touched &&
-      ((error && (
-        <Label basic color="red" pointing="left">
-          {error}
-        </Label>
-      )) ||
-        (warning && (
-          <Label basic color="orange" pointing="left">
-            {warning}
-          </Label>
-        )))}
-  </div>
+      ((error && <StyledError>{error}</StyledError>) ||
+        (warning && <StyledError>{warning}</StyledError>))}
+  </StyledFormInputWrapper>
 );
 
 const LoginForm = props => {
@@ -47,17 +54,23 @@ const LoginForm = props => {
           icon="user"
           autoFocus
           component={renderField}
-          validate={required}
+          validate={[required(), email()]}
         />
         <Field
           name="password"
           placeholder="Password"
           type="password"
           icon="lock"
-          validate={required}
+          validate={[required(), length({ in: [6, 20] })]}
           component={renderField}
         />
-        <Form.Button color="teal" fluid size="large" type="submit">
+        <Form.Button
+          disabled={loading}
+          color="teal"
+          fluid
+          size="large"
+          type="submit"
+        >
           Login
         </Form.Button>
       </Segment>

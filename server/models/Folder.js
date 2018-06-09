@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const httpStatus = require('http-status');
+const moment = require('moment');
 const slug = require('slug');
+const Tag = require('./Tag');
 
 const FolderSchema = new Schema(
   {
@@ -9,10 +11,20 @@ const FolderSchema = new Schema(
     pathSlug: { type: String, unique: true },
     parentID: { type: Schema.Types.ObjectId, ref: 'folders' },
     name: { type: String, required: [true, "can't be blank"] },
-    nameSlug: String
+    nameSlug: String,
+    formattedLastModified: String,
+    tags: [{ type: Schema.Types.ObjectId, ref: 'tags' }]
   },
   {
-    timestamps: true
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: function(doc, ret) {
+        delete ret._id;
+        delete ret.__v;
+        delete ret.createdAt;
+      }
+    }
   }
 );
 
@@ -49,10 +61,17 @@ FolderSchema.pre('save', async function save(next) {
         });
       }
     }
+    this.formattedLastModified = moment(this.updatedAt).format(
+      'DD/MM/YYYY HH:mm'
+    );
     return next();
   } catch (error) {
     return next(error);
   }
+});
+
+FolderSchema.pre('find', function() {
+  this.populate('tags');
 });
 
 /**
@@ -68,7 +87,8 @@ FolderSchema.method({
       'parentID',
       'nameSlug',
       'pathSlug',
-      'updatedAt'
+      'updatedAt',
+      'formattedLastModified'
     ];
 
     fields.forEach(field => {
@@ -110,9 +130,43 @@ FolderSchema.statics = {
     }
   },
 
+  async addTagNameToFolders(itemsIds, tagName) {
+    const query = {},
+      update = { expire: new Date() },
+      options = { upsert: true, new: true, setDefaultsOnInsert: true };
+    const tag = await Tag.findOneAndUpdate({ name: tagName }, update, options);
+    await this.update(
+      { _id: { $in: itemsIds } },
+      { $addToSet: { tags: tag._id } },
+      { multi: true }
+    );
+    return await this.find({ _id: { $in: itemsIds } }).populate('tags');
+  },
+
+  async removeTagByIdFromFolders(itemsIds, tagId) {
+    await this.update(
+      { _id: { $in: itemsIds } },
+      { $pullAll: { tags: [{ _id: mongoose.Types.ObjectId(tagId) }] } },
+      { multi: true }
+    );
+    return await this.find({ _id: { $in: itemsIds } });
+  },
+
   async getFoldersByName(queryName) {
-    const nameRegEx = new RegExp(queryName, 'g');
-    return await this.find({ name: { $regex: nameRegEx } }).limit(10);
+    const nameRegEx = new RegExp(
+      queryName.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
+      'g'
+    );
+    return await this.find(
+      { name: { $regex: nameRegEx } },
+      'id name path pathSlug'
+    ).limit(10);
+  },
+
+  async filterByTags({ ids }) {
+    return await this.find({
+      tags: { $all: ids.map(id => mongoose.Types.ObjectId(id)) }
+    });
   },
 
   /**
@@ -142,6 +196,26 @@ FolderSchema.statics = {
     return error;
   },
 
+  async getUpGoingFolderStructure(link) {
+    const structure = [];
+    const { links } = formatLinkToPathSlugs(link);
+    console.log(links);
+    const hierarchy = await Promise.all(
+      links.map(async link => {
+        return await this.findOne({
+          pathSlug: link
+        });
+      })
+    );
+    hierarchy.unshift({ _id: null });
+    const children = await this.constructor.getChildrenNodes(folder._id);
+    const maxDepth = hierarchy.length;
+    const currentDepth = 0;
+    const folderStructure = hierarchy.reduce(async (acc, folder) => {
+      acc.children = [folder];
+    }, {});
+  },
+
   async getChildrenNodes(parentID) {
     return await this.find({ parentID: parentID });
   },
@@ -160,5 +234,17 @@ FolderSchema.statics = {
     return descendants;
   }
 };
+
+function formatLinkToPathSlugs(link) {
+  const names = link.split('/').filter(val => val != '');
+  const links = [];
+  names.reduce((acc, val, index) => {
+    if (index === 0) {
+      return (links[index] = `${val}`);
+    }
+    return (links[index] = `${acc}/${val}`);
+  }, '');
+  return { links };
+}
 
 module.exports = mongoose.model('folders', FolderSchema);

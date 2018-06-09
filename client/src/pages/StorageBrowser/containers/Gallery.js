@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import Lightbox from 'react-images';
-import { selectImages } from '../selectors';
+import { selectImages } from 'selectors';
 class Gallery extends Component {
   constructor() {
     super();

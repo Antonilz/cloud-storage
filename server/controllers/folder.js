@@ -23,8 +23,8 @@ exports.load = async (req, res, next, id) => {
  * @public
  */
 exports.get = async (req, res, next) => {
-  console.time('get current folder children');
   const pathSlug = req.params[0].trim();
+  //Folder.getUpGoingFolderStructure(pathSlug);
   let rootFolder = false;
   if (pathSlug != null && pathSlug != '') {
     rootFolder = await Folder.find({
@@ -36,36 +36,32 @@ exports.get = async (req, res, next) => {
       rootFolder = rootFolder[0];
     }
   }
-
-  let [childrenFolders, childrenFiles] = await Promise.all([
+  const [childrenFolders, childrenFiles] = await Promise.all([
     Folder.getChildrenNodes(rootFolder ? rootFolder._id : null),
     File.getChildrenNodes(rootFolder ? rootFolder._id : null)
   ]);
+  /*const filesURLs = await Promise.all(
+    childrenFiles.map(async file => await file.getDownloadLink())
+  );*/
 
-  childrenFolders = childrenFolders.map(folder => {
-    return { type: 'folder', data: folder.transform() };
-  });
-
-  const filesURLs = await Promise.all(
-    childrenFiles.map(file => file.getDownloadLink())
-  );
-
-  childrenFiles = childrenFiles.map((file, index) => {
-    return {
-      type: 'file',
-      data: { ...file.transform(), url: filesURLs[index] }
-    };
-  });
-
-  const children = [...childrenFolders, ...childrenFiles];
-  console.timeEnd('get current folder children');
   return res.json({
-    children: children,
+    children: [
+      ...childrenFiles.map((file, index) => {
+        return {
+          type: 'file',
+          data: file
+        };
+      }),
+      ...childrenFolders.map(folder => {
+        return { type: 'folder', data: folder };
+      })
+    ],
     currentFolder: rootFolder
       ? rootFolder.transform()
       : {
           name: '',
-          path: ''
+          path: '',
+          pathSlug: ''
         }
   });
 };
