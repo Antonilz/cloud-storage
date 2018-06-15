@@ -19,7 +19,7 @@ require('./services/passport');
 Promise = require('bluebird'); // eslint-disable-line no-global-assign
 mongoose.connect(
   keys.mongoURI,
-  { keepAlive: 1, useMongoClient: true }
+  { keepAlive: 1 }
 );
 
 const app = express();
