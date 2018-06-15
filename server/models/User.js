@@ -7,6 +7,7 @@ const moment = require('moment-timezone');
 const jwt = require('jwt-simple');
 const { secret } = require('../config/keys');
 const { jwtExpirationInterval } = require('../config/keys');
+const APIError = require('../utils/APIError');
 
 const env = 'test';
 const roles = ['user', 'admin'];
@@ -31,7 +32,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
-      maxlength: 128
+      maxlength: 20
     },
     role: {
       type: String,
@@ -109,9 +110,9 @@ UserSchema.statics = {
         return user;
       }
 
-      throw new Error({
+      throw new APIError({
         message: 'User does not exist',
-        status: httpStatus.NOT_FOUND
+        httpStatus: httpStatus.UNPROCESSABLE_ENTITY
       });
     } catch (error) {
       throw error;
@@ -128,27 +129,31 @@ UserSchema.statics = {
     const { email, password, refreshObject } = options;
 
     if (!email && !refreshObject)
-      throw new Error({
-        message: 'An email is required to generate a token'
+      throw new APIError({
+        message: 'An email is required to generate a token',
+        httpStatus: httpStatus.UNPROCESSABLE_ENTITY
       });
     const user = await this.findOne({
       email: email || refreshObject.userEmail
     }).exec();
-    const err = {
-      status: httpStatus.UNAUTHORIZED,
-      isPublic: true
-    };
+    let message;
     if (password) {
       if (user && (await user.passwordMatches(password))) {
         return { user, accessToken: user.token() };
+      } else if (!user) {
+        message = 'No user with given email found';
+      } else {
+        message = 'Incorrect password';
       }
-      err.message = 'Incorrect email or password';
     } else if (refreshObject) {
       return { user, accessToken: user.token() };
     } else {
-      err.message = 'Incorrect email or refreshToken';
+      message = 'Incorrect email or refreshToken';
     }
-    throw new Error(err);
+    throw new APIError({
+      message,
+      httpStatus: httpStatus.UNPROCESSABLE_ENTITY
+    });
   },
 
   /**
@@ -160,18 +165,9 @@ UserSchema.statics = {
    */
   checkDuplicateEmail(error) {
     if (error.name === 'MongoError' && error.code === 11000) {
-      return new Error({
-        message: 'Validation Error',
-        errors: [
-          {
-            field: 'email',
-            location: 'body',
-            messages: ['"email" already exists']
-          }
-        ],
-        status: httpStatus.CONFLICT,
-        isPublic: true,
-        stack: error.stack
+      throw new APIError({
+        message: 'email already exists',
+        httpStatus: httpStatus.UNPROCESSABLE_ENTITY
       });
     }
   }

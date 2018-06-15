@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const passport = require('passport');
 const User = require('../models/User');
+const APIError = require('../utils/APIError');
 
 const ADMIN = 'admin';
 const LOGGED_USER = 'user';
@@ -8,10 +9,9 @@ const LOGGED_USER = 'user';
 const handleJWT = (req, res, next, roles) => async (err, user, info) => {
   const error = err || info;
   const logIn = Promise.promisify(req.logIn);
-  const apiError = new Error({
+  const apiError = new APIError({
     message: error ? error.message : 'Unauthorized',
-    status: httpStatus.UNAUTHORIZED,
-    stack: error ? error.stack : undefined
+    httpStatus: httpStatus.UNAUTHORIZED
   });
 
   try {

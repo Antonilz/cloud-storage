@@ -3,7 +3,6 @@ const { omit } = require('lodash');
 const Folder = require('../models/Folder');
 const File = require('../models/File');
 const Tag = require('../models/Tag');
-const { handler: errorHandler } = require('../middlewares/error');
 const keys = require('../config/keys');
 
 /**
@@ -45,14 +44,10 @@ exports.delete = async (req, res, next) => {
       const deleteFile = await file.remove();
     } else if (item.type === 'folder') {
       const IDsToDelete = await Folder.getDescendants(item.data.id);
-      const removedFiles = await File.remove(
-        { parentID: { $in: IDsToDelete } },
-        (err, result) => {
-          if (err) {
-            return res.sendStatus(404);
-          }
-        }
-      );
+      const removedFiles = await File.find({
+        parentID: { $in: IDsToDelete }
+      });
+      removedFiles.forEach(async file => await file.remove());
       const removedFolders = await Folder.remove(
         { _id: { $in: IDsToDelete } },
         (err, result) => {
@@ -71,11 +66,10 @@ exports.delete = async (req, res, next) => {
  * @public
  */
 exports.search = async (req, res, next) => {
-  console.time('get all items by query input');
   const { query } = req.body;
   let [foundFolders, foundFiles] = await Promise.all([
-    Folder.getFoldersByName(query),
-    File.getFilesByName(query)
+    Folder.getFoldersByName(query, 10),
+    File.getFilesByName(query, 10)
   ]);
 
   foundFolders = foundFolders.map(folder => {
@@ -90,7 +84,6 @@ exports.search = async (req, res, next) => {
   });
 
   const children = [...foundFolders, ...foundFiles];
-  console.timeEnd('get all items by query input');
   return res.json({ results: children });
 };
 
@@ -102,14 +95,14 @@ exports.update = async (req, res, next) => {
       const updatedFile = await File.findByIdAndUpdate(
         { _id: item.data.id },
         { name: item.data.name },
-        { new: true }
+        { new: true, runValidators: true }
       ).populate('tags');
       return { type: 'file', data: updatedFile };
     } else if (item.type === 'folder') {
-      const updatedFolder = await File.findByIdAndUpdate(
+      const updatedFolder = await Folder.findByIdAndUpdate(
         { _id: item.data.id },
         { name: item.data.name },
-        { new: true }
+        { new: true, runValidators: true }
       ).populate('tags');
       return { type: 'folder', data: updatedFolder };
     }
@@ -143,7 +136,6 @@ exports.deleteTag = async (req, res, next) => {
       itemsIds,
       tagId
     );
-    console.log(updatedFiles);
     return res.json({
       items: [
         ...(updatedFolders ? updatedFolders : []),
@@ -157,10 +149,8 @@ exports.deleteTag = async (req, res, next) => {
 };
 
 exports.searchTags = async (req, res, next) => {
-  console.time('get all items by query input');
   const { query } = req.body;
   const foundTags = await Tag.getTagsByName(query);
-  console.timeEnd('get all items by query input');
   return res.json({ tags: foundTags });
 };
 

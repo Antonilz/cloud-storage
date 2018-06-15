@@ -21,9 +21,9 @@ const s3Client = new aws.S3({
   endpoint: keys.endpoint
 });
 
-async function getSignedUploadLink(bucketName, objectName, expiryTime) {
+async function getSignedUploadLink({ bucketName, objectName, expiryTime }) {
   try {
-    await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       minioClient.presignedPutObject(
         bucketName,
         objectName,
@@ -32,7 +32,7 @@ async function getSignedUploadLink(bucketName, objectName, expiryTime) {
       );
     });
   } catch (err) {
-    console.log(err);
+    throw err;
   }
 }
 

@@ -3,7 +3,6 @@ const validate = require('express-validation');
 const folderController = require('../controllers/folder');
 const itemController = require('../controllers/item');
 const fileController = require('../controllers/file');
-const awsController = require('../controllers/aws');
 const { authorize, ADMIN, LOGGED_USER } = require('../middlewares/auth');
 
 const router = express.Router();
@@ -31,7 +30,7 @@ router
 
 router
   .route('/s3/sign')
-  .get(authorize(LOGGED_USER), awsController.getSignedUploadLink);
+  .get(authorize(LOGGED_USER), fileController.getUploadURL);
 
 // link amazon s3 uuid to DB model
 router
@@ -53,7 +52,6 @@ router
 router
   .route('/items/searchTags')
   .post(authorize(LOGGED_USER), itemController.searchTags);
-
 router
   .route('/items/filterByTags')
   .post(authorize(LOGGED_USER), itemController.filterByTags);

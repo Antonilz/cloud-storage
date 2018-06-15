@@ -4,8 +4,9 @@ const httpStatus = require('http-status');
 const moment = require('moment');
 const slug = require('slug');
 const Tag = require('./Tag');
+const APIError = require('../utils/APIError');
 
-const FolderSchema = new Schema(
+const FolderSchema = new mongoose.Schema(
   {
     path: { type: String, unique: true },
     pathSlug: { type: String, unique: true },
@@ -44,23 +45,6 @@ FolderSchema.pre('save', async function save(next) {
       this.path = `${parent.path}/${this.name}`;
       this.pathSlug = `${parent.pathSlug}/${this.nameSlug}`;
     }
-    if (this.isModified('name')) {
-      // update all descandant nodes path
-      let descendants = [this.id];
-      let stack = [this.id];
-      while (stack.length > 0) {
-        let currentNode = stack.pop();
-        let children = await this.constructor.getChildrenNodes(currentNode);
-        children.forEach(child => {
-          descendants.push(child._id);
-          stack.push(child._id);
-        });
-        stack.forEach(async id => {
-          const child = await this.constructor.get(id);
-          const updatedChild = await child.save();
-        });
-      }
-    }
     this.formattedLastModified = moment(this.updatedAt).format(
       'DD/MM/YYYY HH:mm'
     );
@@ -70,13 +54,48 @@ FolderSchema.pre('save', async function save(next) {
   }
 });
 
+FolderSchema.pre('findOneAndUpdate', async function save(next) {
+  this._update.nameSlug = slug(this._update.name);
+
+  try {
+    const oldFile = await this.model.get(this._conditions._id._id);
+    if (oldFile.parentID == null) {
+      this._update.path = this._update.name;
+      this._update.pathSlug = this._update.nameSlug;
+    } else {
+      const parent = await this.model.get(oldFile.parentID);
+      this._update.path = `${parent.path}/${this._update.name}`;
+      this._update.pathSlug = `${parent.pathSlug}/${this._update.nameSlug}`;
+    }
+    this._update.formattedLastModified = moment(this._update.updatedAt).format(
+      'DD/MM/YYYY HH:mm'
+    );
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+});
+
+FolderSchema.post('findOneAndUpdate', async function save(next) {
+  if (this._update.name) {
+    // update all descandant nodes path
+    let descendants = [this._conditions._id];
+    while (descendants.length > 0) {
+      const currentNodeId = descendants.pop();
+      console.log('current node id', currentNodeId);
+      const currentNode = await this.model.get(currentNodeId);
+      await currentNode.save();
+      let childrenToCheck = await this.model.getChildrenNodes(currentNode.id);
+      descendants.push(...childrenToCheck.map(child => child._id));
+      console.log('new stack', descendants);
+    }
+  }
+});
+
 FolderSchema.pre('find', function() {
   this.populate('tags');
 });
 
-/**
- * Methods
- */
 FolderSchema.method({
   transform() {
     const transformed = {};
@@ -99,9 +118,6 @@ FolderSchema.method({
   }
 });
 
-/**
- * Statics
- */
 FolderSchema.statics = {
   /**
    * Get folder by id
@@ -121,9 +137,9 @@ FolderSchema.statics = {
         return folder;
       }
 
-      throw new Error({
+      throw new APIError({
         message: 'Folder does not exist',
-        status: httpStatus.NOT_FOUND
+        httpStatus: httpStatus.NOT_FOUND
       });
     } catch (error) {
       throw error;
@@ -152,7 +168,7 @@ FolderSchema.statics = {
     return await this.find({ _id: { $in: itemsIds } });
   },
 
-  async getFoldersByName(queryName) {
+  async getFoldersByName(queryName, limit) {
     const nameRegEx = new RegExp(
       queryName.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
       'g'
@@ -160,7 +176,7 @@ FolderSchema.statics = {
     return await this.find(
       { name: { $regex: nameRegEx } },
       'id name path pathSlug'
-    ).limit(10);
+    ).limit(limit);
   },
 
   async filterByTags({ ids }) {
@@ -177,20 +193,10 @@ FolderSchema.statics = {
    * @returns {Error|APIError}
    */
   checkDuplicateFolder(error) {
-    console.log(error);
     if (error.name === 'MongoError' && error.code === 11000) {
-      return new Error({
+      return new APIError({
         message: 'Validation Error',
-        errors: [
-          {
-            field: 'path',
-            location: 'body',
-            messages: ['"path" already exists']
-          }
-        ],
-        status: httpStatus.CONFLICT,
-        isPublic: true,
-        stack: error.stack
+        httpStatus: httpStatus.CONFLICT
       });
     }
     return error;
@@ -222,16 +228,15 @@ FolderSchema.statics = {
 
   async getDescendants(parentID) {
     let descendants = [parentID];
-    let stack = [parentID];
-    while (stack.length > 0) {
-      let currentNode = stack.pop();
-      let children = await this.getChildrenNodes(currentNode);
-      children.forEach(child => {
-        descendants.push(child._id);
-        stack.push(child._id);
-      });
+    const allIDs = [parentID];
+    while (descendants.length > 0) {
+      const currentNodeId = descendants.pop();
+      const currentNode = await this.get(currentNodeId);
+      let childrenToCheck = await this.getChildrenNodes(currentNode.id);
+      descendants.push(...childrenToCheck.map(child => child._id));
+      allIDs.push(...childrenToCheck.map(child => child._id));
     }
-    return descendants;
+    return allIDs;
   }
 };
 

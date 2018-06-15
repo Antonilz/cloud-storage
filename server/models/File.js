@@ -4,11 +4,16 @@ const slug = require('slug');
 const contentDisposition = require('content-disposition');
 const httpStatus = require('http-status');
 const moment = require('moment');
-const { getSignedDownloadLink, deleteObject } = require('../services/minio');
+const {
+  getSignedDownloadLink,
+  getSignedUploadLink,
+  deleteObject
+} = require('../services/minio');
 const { formatBytes } = require('../utils/formatBytes');
 const Folder = require('./Folder');
 const Tag = require('./Tag');
 const keys = require('../config/keys');
+const APIError = require('../utils/APIError');
 
 const FileSchema = new Schema(
   {
@@ -48,9 +53,6 @@ const FileSchema = new Schema(
 
 FileSchema.index({ parentID: 1 });
 
-/**
- * Pre Hooks
- */
 FileSchema.pre('save', async function save(next) {
   try {
     if (this.isNew) {
@@ -102,9 +104,6 @@ FileSchema.pre('update', function save(next) {
   return next();
 });
 
-/**
- * Methods
- */
 FileSchema.method({
   transform() {
     const transformed = {};
@@ -147,9 +146,6 @@ FileSchema.method({
   }
 });
 
-/**
- * Statics
- */
 FileSchema.statics = {
   /**
    * Get file by id
@@ -169,9 +165,9 @@ FileSchema.statics = {
         return file;
       }
 
-      throw new Error({
+      throw new APIError({
         message: 'File does not exist',
-        status: httpStatus.NOT_FOUND
+        httpStatus: httpStatus.NOT_FOUND
       });
     } catch (error) {
       throw error;
@@ -184,7 +180,7 @@ FileSchema.statics = {
     });
   },
 
-  async getFilesByName(queryName) {
+  async getFilesByName(queryName, limit) {
     const nameRegEx = new RegExp(
       queryName.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'),
       'i'
@@ -192,7 +188,20 @@ FileSchema.statics = {
     return await this.find(
       { name: { $regex: nameRegEx } },
       'id name path pathSlug'
-    ).limit(10);
+    ).limit(limit);
+  },
+
+  async getUploadLink({ objectName, expiryTime }) {
+    try {
+      const presignedURL = await getSignedUploadLink({
+        bucketName: keys.bucketName,
+        objectName,
+        expiryTime
+      });
+      return presignedURL;
+    } catch (error) {
+      throw error;
+    }
   },
 
   async filterByTags({ ids }) {
@@ -233,20 +242,10 @@ FileSchema.statics = {
    * @returns {Error|APIError}
    */
   checkDuplicateFile(error) {
-    console.log(error);
     if (error.name === 'MongoError' && error.code === 11000) {
-      return new Error({
+      return new APIError({
         message: 'Validation Error',
-        errors: [
-          {
-            field: 'path',
-            location: 'body',
-            messages: ['"path" already exists']
-          }
-        ],
-        status: httpStatus.CONFLICT,
-        isPublic: true,
-        stack: error.stack
+        status: httpStatus.UNPROCESSABLE_ENTITY
       });
     }
     return error;

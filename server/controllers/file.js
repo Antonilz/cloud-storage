@@ -25,9 +25,8 @@ exports.create = async (req, res, next) => {
     };
     const newFile = new File(file);
     const savedFile = await newFile.save();
-    res.status(httpStatus.CREATED);
     const fileURL = await savedFile.getDownloadLink();
-    return res.json({
+    return res.status(httpStatus.CREATED).json({
       type: 'file',
       data: {
         ...savedFile.transform(),
@@ -36,7 +35,6 @@ exports.create = async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.log(error);
     next(File.checkDuplicateFile(error));
   }
 };
@@ -59,7 +57,28 @@ exports.getDownloadURLs = async (req, res, next) => {
       })
     );
   } catch (e) {
-    console.log(e);
     return res.sendStatus(404);
+  }
+};
+
+exports.getUploadURL = async (req, res) => {
+  const filename = req.query.objectName;
+  const folderPath = req.query.folder;
+  const mimeType = req.query.contentType;
+  //const fileKey = uuidv4(filename); // create unique name
+  const fileKey = `${folderPath === '' ? '' : folderPath + '/'}${filename}`;
+  try {
+    console.log('1');
+    const presignedURL = await File.getUploadLink({
+      objectName: fileKey,
+      expiryTime: 24 * 60 * 60
+    });
+    return res.json({
+      signedUrl: presignedURL,
+      filename: filename,
+      fileKey: fileKey
+    });
+  } catch (error) {
+    console.log(error);
   }
 };

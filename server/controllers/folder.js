@@ -2,7 +2,6 @@ const httpStatus = require('http-status');
 const { omit } = require('lodash');
 const Folder = require('../models/Folder');
 const File = require('../models/File');
-const { handler: errorHandler } = require('../middlewares/error');
 
 /**
  * Load user and append to req.
@@ -14,7 +13,7 @@ exports.load = async (req, res, next, id) => {
     req.locals = { folder };
     return next();
   } catch (error) {
-    return errorHandler(error, req, res);
+    res.status(404).json(error);
   }
 };
 
@@ -88,8 +87,9 @@ exports.create = async (req, res, next) => {
     };
     const folder = new Folder(folderData);
     const savedFolder = await folder.save();
-    res.status(httpStatus.CREATED);
-    res.json({ type: 'folder', data: savedFolder.transform() });
+    res
+      .status(httpStatus.CREATED)
+      .json({ type: 'folder', data: savedFolder.transform() });
   } catch (error) {
     next(Folder.checkDuplicateFolder(error));
   }
@@ -111,7 +111,7 @@ exports.update = async (req, res, next) => {
     );
   }
   const folder = await Folder.get(parentFolder._id);
-  const folder2 = Object.assign(folder, req.body);
+  Object.assign(folder, req.body);
   folder
     .save()
     .then(savedFolder => res.json(savedFolder.transform()))
