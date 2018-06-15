@@ -4,6 +4,8 @@ import memoize from 'lodash.memoize';
 
 const selectItemsById = state => state.storage.childrenById;
 
+const selectStorageIsFetching = state => state.storage.isFetching;
+
 const selectSortOptions = state => state.storage.sortOptions;
 
 const selectViewType = state => state.storage.view;
@@ -42,6 +44,8 @@ const selectItemById = createSelector([selectItemsById], items =>
 );
 
 export {
+  selectItemsById,
+  selectStorageIsFetching,
   selectSortedItemsIds,
   selectItemById,
   selectCheckedItems,

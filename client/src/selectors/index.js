@@ -6,7 +6,7 @@ const selectStorage = state => state.storage;
 
 const selectSortOptions = state => state.storage.sortOptions;
 
-const selectStorageChildren = state => state.storage.children;
+const selectStorageChildren = state => state.storage.childrenById;
 
 const selectSearchTags = state => state.storage.searchTags;
 
@@ -96,103 +96,9 @@ const selectImages = createSelector([selectFiles], files => {
     .map(filteredFile => filteredFile.data);
 });
 
-// Search Items
-
-const selectSearchResults = createSelector([selectSearch], search => {
-  const searchResultsWithKeys = search.results.map(result => {
-    result.key = result.data.id;
-    return result;
-  });
-  return searchResultsWithKeys;
-});
-
-const selectSearchLoadingStatus = createSelector([selectSearch], search => {
-  return search.isFetching;
-});
-
-// Tags
-const selectTagsManager = createSelector([selectSearchTags], searchTags => {
-  return searchTags;
-});
-
-const selectItemsForTagsEdit = createSelector(
-  [selectStorageChildren, selectSearchTags],
-  (items, searchTags) =>
-    items.filter(item => searchTags.itemsIds.includes(item.data.id))
-);
-
-const selectTagsValuesByItemId = createSelector(
-  [selectItemsForTagsEdit],
-  itemsForTagEdit =>
-    [].concat(
-      ...itemsForTagEdit.map(item => item.data.tags.map(tag => tag.name))
-    )
-);
-
-const selectOptions = createSelector(
-  [selectSearchTags, selectItemsForTagsEdit],
-  (searchTags, selectedItems) => {
-    const searchResultsWithKeys = searchTags.results.map(result => {
-      result.key = result.id;
-      result.text = result.name;
-      result.value = result.name;
-      return result;
-    });
-    const tags = selectedItems
-      .map(item =>
-        item.data.tags.map(tag => {
-          return {
-            key: tag.id,
-            text: tag.name,
-            value: tag.name
-          };
-        })
-      )
-      .filter((tag, index, tags) => {
-        return !index || tag.key != tags[index - 1].key;
-      });
-    return [
-      ...searchResultsWithKeys.reduce((acc, val) => acc.concat(val), []),
-      ...tags.reduce((acc, val) => acc.concat(val), [])
-    ];
-  }
-);
-
-const selectFilteringTags = createSelector(
-  [selectTagsFilter],
-  tagsFilter => tagsFilter.tags
-);
-
-const selectFilteringTagsNames = createSelector(
-  [selectTagsFilter],
-  tagsFilter => tagsFilter.tags.map(tag => tag.name)
-);
-
-const selectTagsFilterOptions = createSelector(
-  [selectSearchTags, selectFilteringTags],
-  (searchTags, selectedItems) => {
-    const searchResultsWithKeys = searchTags.results.map(result => {
-      result.key = result.id;
-      result.text = result.name;
-      result.value = result.name;
-      return result;
-    });
-    const tags = selectedItems.map(tag => {
-      return {
-        key: tag.id,
-        text: tag.name,
-        value: tag.name
-      };
-    });
-    return [...searchResultsWithKeys, ...tags];
-  }
-);
-
 export {
   selectSortedStorage,
   selectImages,
-  selectSearchResults,
-  selectSearchLoadingStatus,
   selectSortedStorageIDs,
   selectItemByID,
   selectItemsByIDs,
@@ -200,12 +106,6 @@ export {
   selectSelectedItemsCount,
   selectCurrentViewType,
   selectStorageIsFetching,
-  selectOptions,
-  selectTagsValuesByItemId,
-  selectTagsManager,
   selectCheckedItemsIds,
-  selectCheckedItems,
-  selectTagsFilterOptions,
-  selectFilteringTagsNames,
-  selectFilteringTags
+  selectCheckedItems
 };

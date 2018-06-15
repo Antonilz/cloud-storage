@@ -2,7 +2,6 @@ import {
   SET_AUTH_STATUS,
   SENDING_REQUEST,
   REQUEST_ERROR,
-  CLEAR_ERROR,
   GET_USER_INFO_SUCCESS,
   LOGIN_SUCCESS,
   LOGOUT_SUCCESS,
@@ -31,8 +30,6 @@ const initialState = {
 
 export default function(state = initialState, action) {
   switch (action.type) {
-    case SET_AUTH_STATUS:
-      return { ...state, loggedIn: action.newAuthState };
     case LOGOUT_SUCCESS:
       return {
         ...state,
@@ -64,8 +61,6 @@ export default function(state = initialState, action) {
       return { ...state, token: { ...state.token, isRefreshing: true } };
     case REFRESH_TOKEN_SUCCESS:
       return { ...state, token: { ...action.data.token, isRefreshing: false } };
-    case CLEAR_ERROR:
-      return { ...state, error: '' };
     default:
       return state;
   }

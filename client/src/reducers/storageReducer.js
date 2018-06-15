@@ -1,6 +1,4 @@
 import {
-  REQUEST_ERROR,
-  CLEAR_ERROR,
   GET_FOLDER_REQUEST,
   GET_FOLDER_SUCCESS,
   SEARCH_ITEMS_REQUEST,
@@ -64,12 +62,9 @@ const initialState = {
 
 export default function(state = initialState, action) {
   switch (action.type) {
-    case REQUEST_ERROR:
-      return { ...state, error: action.error };
     case GET_FOLDER_REQUEST:
       return { ...state, isFetching: true };
     case GET_FOLDER_SUCCESS:
-      console.log('new data');
       return {
         ...state,
         currentFolder: {
@@ -109,6 +104,7 @@ export default function(state = initialState, action) {
         }
       };
     case SEARCH_TAGS_SUCCESS:
+      console.log(action.data);
       return {
         ...state,
         searchTags: {
@@ -127,7 +123,6 @@ export default function(state = initialState, action) {
         },
         selected: action.status ? state.selected + 1 : state.selected - 1
       };
-
     case TOGGLE_ITEM_RENAME:
       return {
         ...state,
@@ -182,7 +177,7 @@ export default function(state = initialState, action) {
           ...state.childrenById,
           ...action.items.reduce((obj, item) => {
             return {
-              obj,
+              ...obj,
               [item.id]: {
                 ...state.childrenById[item.id],
                 data: { ...state.childrenById[item.id].data, ...item }
@@ -302,8 +297,6 @@ export default function(state = initialState, action) {
           }
         }
       };
-    case CLEAR_ERROR:
-      return { ...state, error: '' };
     default:
       return state;
   }

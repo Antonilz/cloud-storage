@@ -1,11 +1,4 @@
-import {
-  take,
-  call,
-  put,
-  fork,
-  takeEvery,
-  takeLatest
-} from 'redux-saga/effects';
+import { call, put, fork, takeEvery, takeLatest } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import axios from 'axios';
 import { push } from 'react-router-redux';
@@ -46,6 +39,7 @@ import {
   DOWNLOAD_FILE,
   FILTER_ITEMS_BY_TAGS_REQUEST
 } from '../constants/actionTypes';
+
 /**
  * Effect to handle authorization
  * @param  {string} username               The username of the user
@@ -53,7 +47,7 @@ import {
  * @param  {object} options                Options
  * @param  {boolean} options.isRegistering Is this a register request?
  */
-export function* getFolderInfo({ accessToken, pathSlug, notInitial }) {
+export function* getFolderInfo({ accessToken, pathSlug }) {
   try {
     const response = yield call(
       axios.get,
@@ -63,14 +57,10 @@ export function* getFolderInfo({ accessToken, pathSlug, notInitial }) {
       }
     );
     if (response) {
-      /*if (notInitial) {
-        yield put(push(`/storage/${pathSlug}`));
-    }*/
       yield put({ type: GET_FOLDER_SUCCESS, data: response.data });
     }
   } catch (error) {
     yield put({ type: GET_FOLDER_FAILURE, error: error.message });
-    return false;
   }
 }
 
@@ -97,7 +87,6 @@ export function* searchItems({ accessToken, query }) {
     }
   } catch (error) {
     yield put({ type: SEARCH_ITEMS_FAILURE, error: error.message });
-    return false;
   } finally {
     //yield put({ type: SENDING_REQUEST, sending: false });
   }
@@ -113,7 +102,6 @@ export function* searchItems({ accessToken, query }) {
 export function* createFolder({ accessToken, name, path, promise }) {
   try {
     const parentPath = path.replace(/home.|home|^\//, '');
-    console.log(parentPath);
     const response = yield call(
       axios.post,
       `${API_URL}/storage/folders/${parentPath}`,
@@ -129,9 +117,6 @@ export function* createFolder({ accessToken, name, path, promise }) {
     return response;
   } catch (error) {
     yield put({ type: CREATE_FOLDER_FAILURE, error: error.message });
-    return false;
-  } finally {
-    //yield put({ type: SENDING_REQUEST, sending: false });
   }
 }
 
@@ -159,9 +144,11 @@ export function* renameItem({ accessToken, item, name, promise }) {
     return response;
   } catch (error) {
     yield put({ type: RENAME_ITEM_FAILURE, error: error.message });
-    return false;
-  } finally {
-    //yield put({ type: SENDING_REQUEST, sending: false });
+    yield put({
+      type: TOGGLE_ITEM_RENAME,
+      id: item.data.id,
+      status: false
+    });
   }
 }
 
@@ -186,9 +173,6 @@ export function* deleteSelectedItems({ accessToken, selectedItems }) {
     }
   } catch (error) {
     yield put({ type: DELETE_SELECTED_ITEMS_FAILURE, error: error.message });
-    return false;
-  } finally {
-    //yield put({ type: SENDING_REQUEST, sending: false });
   }
 }
 
@@ -203,7 +187,7 @@ export function* createFile({ accessToken, pathSlug, file, samePath }) {
       }
     );
     if (response) {
-      NotificationManager.success(file.name, 'File uploaded', 3000);
+      //NotificationManager.success(file.name, 'File uploaded', 3000);
       if (samePath) {
         yield put({ type: CREATE_FILE_SUCCESS, item: response.data });
       }
@@ -211,9 +195,6 @@ export function* createFile({ accessToken, pathSlug, file, samePath }) {
   } catch (error) {
     yield put({ type: CREATE_FILE_FAILURE, error: error.message });
     NotificationManager.error(file.name, 'Failed uploading file', 3000);
-    return false;
-  } finally {
-    //yield put({ type: SENDING_REQUEST, sending: false });
   }
 }
 
@@ -250,7 +231,7 @@ export function* downloadFile({ accessToken, id, url, disposition }) {
           window.location = response.data[0].attachmentURL;
         }
       }
-    } catch (e) {
+    } catch (error) {
       return false;
     }
   }
@@ -290,7 +271,6 @@ export function* deleteTag({ accessToken, itemsIds, tagId }) {
     }
   } catch (error) {
     yield put({ type: DELETE_TAG_FAILURE, error: error.message });
-    return false;
   }
 }
 
@@ -309,7 +289,6 @@ export function* filterItemsByTags({ accessToken, ids }) {
     }
   } catch (error) {
     yield put({ type: GET_FOLDER_FAILURE, error: error.message });
-    return false;
   }
 }
 
@@ -324,11 +303,11 @@ export function* searchTags({ accessToken, query }) {
       }
     );
     if (response) {
+      console.log(response.data);
       yield put({ type: SEARCH_TAGS_SUCCESS, data: response.data });
     }
   } catch (error) {
     yield put({ type: SEARCH_TAGS_FAILURE, error: error.message });
-    return false;
   }
 }
 

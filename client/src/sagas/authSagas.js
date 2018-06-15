@@ -110,7 +110,8 @@ export function* refreshTokens() {
 
 export function* needRefresh() {
   const { expiresIn } = yield select(selectTokensData);
-  return moment(expiresIn).isBefore();
+  //return moment(expiresIn).isBefore();
+  return Date.parse(expiresIn) < new Date();
 }
 
 export function authedSaga(saga) {
