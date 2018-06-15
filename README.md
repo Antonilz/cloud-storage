@@ -15,7 +15,7 @@ create or use mongoDB server/service
 
 
 fill in\
-server/config/keys.js
+server/config/dev.js
 ```
 module.exports = {
   mongoURI: 'mongo URI',
