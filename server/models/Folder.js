@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const httpStatus = require('http-status');
 const moment = require('moment');
-const slug = require('slug');
+const slugify = require('slugify');
 const Tag = require('./Tag');
 const APIError = require('../utils/APIError');
 
@@ -35,7 +35,7 @@ FolderSchema.index({ name: 'text' });
  * Pre Hooks
  */
 FolderSchema.pre('save', async function save(next) {
-  this.nameSlug = slug(this.name);
+  this.nameSlug = slugify(this.name);
   try {
     if (this.parentID == null) {
       this.path = this.name;
@@ -55,7 +55,7 @@ FolderSchema.pre('save', async function save(next) {
 });
 
 FolderSchema.pre('findOneAndUpdate', async function save(next) {
-  this._update.nameSlug = slug(this._update.name);
+  this._update.nameSlug = slugify(this._update.name);
 
   try {
     const oldFile = await this.model.get(this._conditions._id._id);

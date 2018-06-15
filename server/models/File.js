@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const slug = require('slug');
+const slugify = require('slugify');
 const contentDisposition = require('content-disposition');
 const httpStatus = require('http-status');
 const moment = require('moment');
