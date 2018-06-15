@@ -7,8 +7,8 @@
     "history": "^4.7.2",
     "lodash.memoize": "^4.1.2",
     "moment": "^2.22.2",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
     "react-dropzone": "^4.2.11",
     "react-dropzone-s3-uploader": "^1.1.0",
     "react-helmet": "^5.2.0",
@@ -16,15 +16,15 @@
     "react-notifications": "^1.4.3",
     "react-redux": "^5.0.7",
     "react-router": "^4.3.1",
-    "react-router-dom": "^4.3.0",
+    "react-router-dom": "^4.3.1",
     "react-router-redux": "^5.0.0-alpha.9",
     "react-s3-uploader": "^4.8.0",
-    "react-scripts": "1.0.14",
+    "react-scripts": "^1.1.4",
     "react-virtualized": "^9.19.1",
     "redux": "^3.7.2",
-    "redux-form": "^7.1.2",
+    "redux-form": "^7.4.2",
     "redux-form-saga": "^0.2.0",
-    "redux-form-validators": "^2.7.0",
+    "redux-form-validators": "^2.7.1",
     "redux-saga": "^0.15.6",
     "reselect": "^3.0.1",
     "semantic-ui-css": "^2.3.1",
@@ -44,5 +44,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "webpack-bundle-analyzer": "^2.13.1"
   }
 }
