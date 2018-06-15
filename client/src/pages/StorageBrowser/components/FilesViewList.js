@@ -3,7 +3,7 @@ import { Checkbox } from 'semantic-ui-react';
 import styled from 'styled-components';
 import { Table as VTable, AutoSizer, WindowScroller } from 'react-virtualized';
 import ListRow from '../containers/ListRow';
-import 'react-virtualized/styles.css';
+//import 'react-virtualized/styles.css';
 
 const StyledTable = styled(VTable)`
   background-color: white;

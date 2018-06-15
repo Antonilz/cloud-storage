@@ -4,7 +4,10 @@ import { withRouter } from 'react-router-dom';
 import { Search, Label, List, Icon, Header } from 'semantic-ui-react';
 import styled from 'styled-components';
 import { getIconFromType } from 'utils/mimeCheck';
-import { selectSearchResults, selectSearchLoadingStatus } from 'selectors';
+import {
+  selectSearchResults,
+  selectSearchLoadingStatus
+} from 'selectors/searchSelectors';
 import { searchItemsRequest } from 'actions/storage';
 
 const StyledSearch = styled(Search)`
@@ -132,7 +135,10 @@ const mapStateToProps = state => ({
 });
 
 export default withRouter(
-  connect(mapStateToProps, {
-    searchItemsRequest
-  })(SearchItems)
+  connect(
+    mapStateToProps,
+    {
+      searchItemsRequest
+    }
+  )(SearchItems)
 );

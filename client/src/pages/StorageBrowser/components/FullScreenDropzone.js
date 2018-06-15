@@ -17,25 +17,18 @@ class FullScreenDropzone extends PureComponent {
       'notDropzoneProps'
     ]
   };
+
+  state = {
+    dropzoneActive: false
+  };
+
   constructor(props) {
     super();
     const uploadedFiles = [];
     const { filename } = props;
-    if (filename) {
-      uploadedFiles.push({
-        filename,
-        fileUrl: this.fileUrl(props.s3Url, filename),
-        default: true,
-        file: {}
-      });
-    }
-    this.state = {
-      uploadedFiles,
-      dropzoneActive: false
-    };
   }
 
-  componentWillMount = () => this.setUploaderOptions(this.props);
+  componentDidMount = () => this.setUploaderOptions(this.props);
   componentWillReceiveProps = props => this.setUploaderOptions(props);
 
   setUploaderOptions = props => {
@@ -113,21 +106,6 @@ class FullScreenDropzone extends PureComponent {
   fileUrl = (s3Url, filename) =>
     `${s3Url.endsWith('/') ? s3Url.slice(0, -1) : s3Url}/${filename}`;
 
-  renderProgress = ({ progress }) =>
-    progress ? <div className="rdsu-progress">{progress}</div> : null;
-
-  renderError = ({ error }) =>
-    error ? <div className="rdsu-error small">{error}</div> : null;
-
-  renderFile = ({ uploadedFile }) => (
-    <div className="rdsu-file">
-      <div className="rdsu-file-icon">
-        <span className="fa fa-file-o" style={{ fontSize: '50px' }} />
-      </div>
-      <div className="rdsu-filename">{uploadedFile.file.name}</div>
-    </div>
-  );
-
   render() {
     const {
       s3Url,
@@ -136,14 +114,8 @@ class FullScreenDropzone extends PureComponent {
       imageComponent,
       fileComponent,
       progressComponent,
-      errorComponent,
-      ...dropzoneProps
+      errorComponent
     } = this.props;
-
-    const ImageComponent = imageComponent || this.renderImage;
-    const FileComponent = fileComponent || this.renderFile;
-    const ProgressComponent = progressComponent || this.renderProgress;
-    const ErrorComponent = errorComponent || this.renderError;
 
     const { dropzoneActive, uploadedFiles } = this.state;
     const overlayStyle = {
@@ -159,21 +131,7 @@ class FullScreenDropzone extends PureComponent {
       zIndex: '100'
     };
     const childProps = { s3Url, ...this.state };
-    const content = (
-      <div>
-        {uploadedFiles.map(uploadedFile => {
-          const props = {
-            key: uploadedFile.filename,
-            uploadedFile: uploadedFile,
-            ...childProps
-          };
-          return;
-          <FileComponent {...props} />;
-        })}
-        {this.state.progress > 0 && <ProgressComponent {...childProps} />}
-        <ErrorComponent {...childProps} />
-      </div>
-    );
+    const ProgressComponent = progressComponent || this.renderProgress;
     return (
       <Dropzone
         disableClick
@@ -185,7 +143,7 @@ class FullScreenDropzone extends PureComponent {
       >
         {dropzoneActive && <div style={overlayStyle}>Drop files... </div>}
         {this.props.children}
-        {content}
+        {this.state.progress > 0 && <ProgressComponent {...childProps} />}
       </Dropzone>
     );
   }

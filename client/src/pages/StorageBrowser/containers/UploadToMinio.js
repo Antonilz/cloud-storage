@@ -5,7 +5,7 @@ import { Grid, Header, Progress, Segment } from 'semantic-ui-react';
 import { formatBytes } from 'utils/formatBytes';
 import FullScreenDropzone from '../components/FullScreenDropzone';
 import { UPLOAD_URL } from 'constants/api';
-import mime from 'mime-types';
+//import mime from 'mime-types';
 
 class UploadToMinio extends PureComponent {
   handleFinishedUpload = info => {
@@ -13,7 +13,8 @@ class UploadToMinio extends PureComponent {
       uuid: info.fileKey,
       name: info.file.name,
       size: info.file.size,
-      type: info.file.type === '' ? mime.lookup(info.file.name) : info.file.type
+      type: info.file.type === '' ? 'application/octet-stream' : info.file.type
+      //type: info.file.type === '' ? 'application/octet-stream'mime.lookup(info.file.name) : info.file.type
     };
     const samePath = this.props.pathSlug == info.file.path;
     this.props.createFile({ pathSlug: info.file.path, file, samePath });
@@ -23,7 +24,7 @@ class UploadToMinio extends PureComponent {
     const file = files[0];
     const formattedTotalBytes = formatBytes(file.size);
     const formattedUploadedBytes = formatBytes(
-      Math.round(progress * file.size / 100)
+      Math.round((progress * file.size) / 100)
     );
     return (
       progress > 0 && (
@@ -47,13 +48,7 @@ class UploadToMinio extends PureComponent {
       )
     );
   }
-  renderUploadedFile({ uploadedFile }) {
-    return (
-      <Header as="h2" color="teal">
-        {uploadedFile.file.name}
-      </Header>
-    );
-  }
+
   render() {
     let fileType = '';
     const uploadOptions = {
@@ -75,7 +70,6 @@ class UploadToMinio extends PureComponent {
         maxSize={1024 * 1024 * 100} // 100 MB file size limit
         upload={uploadOptions}
         progressComponent={this.renderUploadProgress}
-        fileComponent={this.renderUploadedFile}
         dropZoneRef={this.props.dropZoneRef}
       >
         {this.props.children}
@@ -88,4 +82,7 @@ const mapStateToProps = state => ({
   auth: state.auth
 });
 
-export default connect(mapStateToProps, { createFileRequest })(UploadToMinio);
+export default connect(
+  mapStateToProps,
+  { createFileRequest }
+)(UploadToMinio);

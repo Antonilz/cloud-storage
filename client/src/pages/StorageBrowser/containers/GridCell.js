@@ -7,7 +7,7 @@ import { getIconFromType } from 'utils/mimeCheck';
 import { selectItemById } from 'selectors/storageSelectors';
 
 const StyledCell = styled.div`
-  padding: 15px 3vw;
+  padding: 15px;
   &:hover {
     cursor: pointer;
     .itemLabel {
@@ -26,12 +26,12 @@ const StyledCell = styled.div`
     justify-content: center;
 
     .itemName {
-      display: flex;
       align-items: center;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       text-align: center;
+      width: 100%;
     }
 
     &:hover {
@@ -55,7 +55,7 @@ const StyledCell = styled.div`
 const StyledCheckboxWrapper = styled.div`
   position: absolute;
   top: 20px;
-  left: 15px;
+  left: 20px;
   height: 35px;
   width: 35px;
   display: flex;
@@ -65,7 +65,7 @@ const StyledCheckboxWrapper = styled.div`
 const StyledMenuWrapper = styled.div`
   position: absolute;
   top: 15px;
-  right: 10px;
+  right: 15px;
 `;
 
 const StyledThumbnailContainer = styled.div`
@@ -80,7 +80,7 @@ const StyledThumbnailContainer = styled.div`
   background-color: ${props => props.checked && 'rgba(0, 0, 0, 0.05)'};
 
   i {
-    font-size: 7vw !important;
+    font-size: 11vw !important;
     color: #5995ed;
   }
 `;
@@ -110,7 +110,7 @@ class GridCell extends PureComponent {
 
   handleItemLabelClick = (e, data) => {
     const { item } = this.props;
-    if (e.target.name != 'name') {
+    if (e.target.name !== 'name') {
       item.type === 'folder'
         ? this.props.onFolderClick({ pathSlug: item.data.pathSlug })
         : this.props.onFileClick({ file: item.data, mode: 'open' });

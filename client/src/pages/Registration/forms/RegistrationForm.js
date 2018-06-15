@@ -1,13 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Field, reduxForm } from 'redux-form';
-import { Form, Label, Segment } from 'semantic-ui-react';
+import { Form, Segment } from 'semantic-ui-react';
 import styled from 'styled-components';
-import Validators, {
-  required,
-  email,
-  length,
-  confirmation
-} from 'redux-form-validators';
+import { required, email, length, confirmation } from 'redux-form-validators';
 
 const StyledFormInputWrapper = styled.div`
   padding: 10px 0;
@@ -42,7 +37,7 @@ const renderField = ({
 );
 
 const RegistrationForm = props => {
-  const { handleSubmit, pristine, submitting, error, loading } = props;
+  const { handleSubmit, submitting, error, loading } = props;
   return (
     <Form onSubmit={handleSubmit} loading={loading} size="large">
       <Segment stacked>

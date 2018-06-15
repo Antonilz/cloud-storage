@@ -4,8 +4,7 @@ import { userInfoRequest, restoreTokensRequest } from '../actions/auth';
 import { checkToken, getToken } from '../utils/localStorage';
 
 class RefreshToken extends PureComponent {
-  componentWillMount() {
-    console.log('refresh');
+  componentDidMount() {
     checkToken('refreshToken') && this.props.restoreTokensRequest();
   }
 
@@ -14,6 +13,7 @@ class RefreshToken extends PureComponent {
   }
 }
 
-export default connect(null, { userInfoRequest, restoreTokensRequest })(
-  RefreshToken
-);
+export default connect(
+  null,
+  { userInfoRequest, restoreTokensRequest }
+)(RefreshToken);

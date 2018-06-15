@@ -11,7 +11,7 @@ const StyledViewTypeSelector = styled(Menu.Item)`
 
 class StorageActionsMenu extends PureComponent {
   handleChangeViewClick = (e, data) => {
-    e.preventDefault;
+    e.preventDefault();
     this.props.onChangeViewClick(data.value);
   };
 

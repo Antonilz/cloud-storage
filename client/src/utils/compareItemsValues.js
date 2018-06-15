@@ -1,24 +1,21 @@
-// function for dynamic sorting
+// compare two field values
 export function compareItemsValues({ fieldName, order }) {
   return function(a, b) {
-    if (a.data[fieldName] == undefined || b.data[fieldName] == undefined) {
+    if (a.data[fieldName] === undefined || b.data[fieldName] === undefined) {
       return 0;
     }
 
-    let firstItemValue = a.data[fieldName];
-
-    let secondItemValue = b.data[fieldName];
+    let firstItemValue = a.data[fieldName],
+      secondItemValue = b.data[fieldName];
 
     if (typeof a.data[fieldName].getMonth === 'function') {
       firstItemValue = new Date(a.data[fieldName]);
       secondItemValue = new Date(b.data[fieldName]);
-    }
-
-    let comparison = 0;
-    if (fieldName == 'name') {
+    } else if (fieldName === 'name') {
       firstItemValue = firstItemValue.toUpperCase();
       secondItemValue = secondItemValue.toUpperCase();
     }
+    let comparison = 0;
     if (firstItemValue > secondItemValue) {
       comparison = 1;
     } else if (firstItemValue < secondItemValue) {
@@ -27,7 +24,7 @@ export function compareItemsValues({ fieldName, order }) {
       comparison = 0;
     }
 
-    return order == 'desc' ? comparison * -1 : comparison;
+    return order === 'desc' ? comparison * -1 : comparison;
   };
 }
 

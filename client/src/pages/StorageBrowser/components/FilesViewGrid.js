@@ -12,11 +12,12 @@ import {
 } from 'semantic-ui-react';
 import styled from 'styled-components';
 import { Grid as VGrid, AutoSizer, WindowScroller } from 'react-virtualized';
-import 'react-virtualized/styles.css';
+//import 'react-virtualized/styles.css';
 import GridCell from '../containers/GridCell';
 
 const StyledGrid = styled(VGrid)`
   background-color: white;
+  padding-bottom: 20px;
   &:focus {
     outline: none;
   }
@@ -58,23 +59,37 @@ class FilesViewGrid extends PureComponent {
           <WindowScroller>
             {({ height, isScrolling, onChildScroll, scrollTop }) => (
               <AutoSizer disableHeight>
-                {({ width }) => (
-                  <StyledGrid
-                    autoHeight
-                    scrollTop={scrollTop}
-                    isScrolling={isScrolling}
-                    onScroll={onChildScroll}
-                    width={width}
-                    height={height}
-                    rowHeight={180}
-                    columnWidth={width / 4}
-                    columnCount={4}
-                    rowCount={Math.ceil(this.props.itemsIDs.length / 4)}
-                    overScanRowCount={10}
-                    items={this.props.itemsIDs}
-                    cellRenderer={this.cellRenderer}
-                  />
-                )}
+                {({ width }) => {
+                  let itemsCount = 5;
+                  if (width <= 768) {
+                    itemsCount = 3;
+                  } else if (width > 768 && width <= 1280) {
+                    itemsCount = 5;
+                  } else {
+                    itemsCount = 5;
+                  }
+
+                  return (
+                    <StyledGrid
+                      autoHeight
+                      scrollTop={scrollTop}
+                      isScrolling={isScrolling}
+                      onScroll={onChildScroll}
+                      width={width}
+                      height={height}
+                      //rowHeight={180}
+                      rowHeight={width / itemsCount}
+                      columnWidth={width / itemsCount}
+                      columnCount={itemsCount}
+                      rowCount={Math.ceil(
+                        this.props.itemsIDs.length / itemsCount
+                      )}
+                      overScanRowCount={10}
+                      items={this.props.itemsIDs}
+                      cellRenderer={this.cellRenderer}
+                    />
+                  );
+                }}
               </AutoSizer>
             )}
           </WindowScroller>

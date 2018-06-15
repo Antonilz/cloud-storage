@@ -14,7 +14,6 @@ class ItemsSortOptions extends PureComponent {
   };
 
   render() {
-    const hasSelectedItems = this.props.numOfSelectedItems > 0;
     const { fieldName, order, formattedName } = this.props.sortOptions;
     return (
       <Dropdown text={formattedName} item multiple>

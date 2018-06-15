@@ -14,7 +14,7 @@ import StorageBrowser from './pages/StorageBrowser';
 import 'react-notifications/lib/notifications.css';
 import 'semantic-ui-css/semantic.min.css';
 import PrivateRoute from 'components/PrivateRoute';
-import { whyDidYouUpdate } from 'why-did-you-update';
+//import { whyDidYouUpdate } from 'why-did-you-update';
 
 const history = createHistory();
 const store = configureStore(history);

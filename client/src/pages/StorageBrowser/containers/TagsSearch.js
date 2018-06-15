@@ -9,7 +9,7 @@ import {
   selectTagsFilterOptions,
   selectFilteringTagsNames,
   selectFilteringTags
-} from 'selectors';
+} from 'selectors/tagsSelectors';
 import {
   addFilterTag,
   deleteFilterTag,
@@ -42,6 +42,7 @@ const StyledWrapper = styled.div`
     //padding-bottom: 31px;
   }
 `;
+
 class TagsSearch extends PureComponent {
   constructor(props) {
     super(props);
@@ -73,11 +74,13 @@ class TagsSearch extends PureComponent {
       });
     }
   };
+
   handleSearchButtonClick = (e, data) => {
     this.props.getItemsByTagsFilter({
       ids: this.props.currentFilter.map(tag => tag.id)
     });
   };
+
   handleSearchChange = (e, { searchQuery }) => {
     const self = this;
     if (this.timeout) clearTimeout(this.timeout);
@@ -120,7 +123,6 @@ class TagsSearch extends PureComponent {
             content="Filter"
             position="right"
             color="blue"
-            loading={this.props.tagsManager.isFetching}
             onClick={this.handleSearchButtonClick}
           />
         </Menu>
@@ -138,10 +140,13 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-export default connect(mapStateToProps, {
-  deleteFilterTag,
-  addFilterTag,
-  toggleTagsEdit,
-  searchTagsRequest,
-  getItemsByTagsFilter
-})(TagsSearch);
+export default connect(
+  mapStateToProps,
+  {
+    deleteFilterTag,
+    addFilterTag,
+    toggleTagsEdit,
+    searchTagsRequest,
+    getItemsByTagsFilter
+  }
+)(TagsSearch);

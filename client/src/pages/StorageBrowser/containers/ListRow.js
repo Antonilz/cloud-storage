@@ -1,63 +1,10 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import {
-  Icon,
-  Checkbox,
-  Dropdown,
-  Menu,
-  Header,
-  Button,
-  Table,
-  Portal,
-  Popup
-} from 'semantic-ui-react';
+import { Icon, Checkbox, Dropdown, Menu } from 'semantic-ui-react';
 import styled from 'styled-components';
 import ItemRenameForm from '../forms/ItemRenameForm';
 import { getIconFromType } from 'utils/mimeCheck';
 import { selectItemById } from 'selectors/storageSelectors';
-
-const StyledRow = styled.div`
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns:
-      minmax(20px, 50px) minmax(200px, 5fr) 3fr
-      2fr 2fr;
-    grid-gap: 20px;
-    //border: 1px 1px 0 1px solid rgba(34, 36, 38, 0.15);
-    border-bottom 1px solid #e6e8eb;
-    background-color: ${props =>
-      props.checked ? 'rgba(0, 0, 0, 0.05)' : 'white'};
-
-  
-  
-  &:hover {
-    cursor: pointer;
-    ${StyledItemLabel} {
-      color: #5995ed;
-    }
-  }
-
-  .ui.dropdown > .menu {
-    left: auto !important;
-    right: 0 !important;
-  }
-`;
-
-const StyledCell = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  padding-right: 20px;
-
-  &.selectBox {
-    padding: 0;
-    justify-content: center;
-  }
-
-  &.last {
-    justify-content: flex-end;
-  }
-`;
 
 const StyledItemLabel = styled.div`
   display: flex;
@@ -77,13 +24,55 @@ const StyledItemLabel = styled.div`
   }
 
   .itemName {
-    display: flex;
     align-items: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     margin-left: 10px;
     width: 100%;
+  }
+`;
+
+const StyledRow = styled.div`
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns:
+      minmax(20px, 50px) minmax(200px, 5fr) 3fr
+      2fr 2fr;
+    grid-gap: 20px;
+    //border: 1px 1px 0 1px solid rgba(34, 36, 38, 0.15);
+    border-bottom 1px solid #e6e8eb;
+    background-color: ${props =>
+      props.checked ? 'rgba(0, 0, 0, 0.05)' : 'white'};
+  
+  
+  &:hover {
+    cursor: pointer;
+    ${StyledItemLabel} {
+      color: #5995ed;
+    }
+  }
+
+  .ui.dropdown > .menu {
+    left: auto !important;
+    right: 0 !important;
+  }
+`;
+
+const StyledCell = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  //padding-right: 20px;
+
+  &.selectBox {
+    padding: 0;
+    justify-content: center;
+  }
+
+  &.last {
+    padding-right: 20px;
+    justify-content: flex-end;
   }
 `;
 

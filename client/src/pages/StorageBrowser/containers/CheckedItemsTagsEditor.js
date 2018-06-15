@@ -14,7 +14,7 @@ import {
   selectOptions,
   selectTagsValuesByItemId,
   selectTagsManager
-} from 'selectors';
+} from 'selectors/tagsSelectors';
 import {
   addTagToItems,
   deleteTagFromItems,
@@ -23,40 +23,34 @@ import {
 } from 'actions/storage';
 
 const StyledModal = styled(Modal)`
-  & {
-    min-height: 250px;
-    width: 60% !important
-    margin: -125px 0 0 -32% !important;
-  }
+  min-height: 250px;
+  width: 60% !important;
 `;
 
 const StyledDropdown = styled(Dropdown)`
-  & {
+  display: flex !important;
+  flex-wrap: wrap;
+  .label {
+    flex-grow: 1;
     display: flex !important;
-    flex-wrap: wrap;
-    .label {
-      flex-grow: 1;
-      display: flex !important;
-      justify-content: center;
-    }
-    input {
-      flex-grow: 100;
-      display: flex !important;
-      width: auto !important;
-    }
+    justify-content: center;
+  }
+  input {
+    flex-grow: 100;
+    display: flex !important;
+    width: auto !important;
   }
 `;
 
 const StyledSearch = styled(Search)`
-  & {
-    margin-bottom: 40px;
-    .results {
-      width: 100% !important;
-      max-height: 200px;
-      overflow-y: auto;
-    }
+  margin-bottom: 30px;
+  .results {
+    width: 100% !important;
+    max-height: 200px;
+    overflow-y: auto;
   }
 `;
+
 class CheckedItemsTagsEditor extends PureComponent {
   state = {
     value: '',
@@ -166,9 +160,12 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-export default connect(mapStateToProps, {
-  deleteTagFromItems,
-  addTagToItems,
-  toggleTagsEdit,
-  searchTagsRequest
-})(CheckedItemsTagsEditor);
+export default connect(
+  mapStateToProps,
+  {
+    deleteTagFromItems,
+    addTagToItems,
+    toggleTagsEdit,
+    searchTagsRequest
+  }
+)(CheckedItemsTagsEditor);

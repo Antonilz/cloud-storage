@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Popup, Menu, Icon } from 'semantic-ui-react';
 import FolderCreateForm from '../forms/FolderCreateForm';
 

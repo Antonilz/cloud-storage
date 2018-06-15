@@ -5,8 +5,9 @@ import styled from 'styled-components';
 import {
   selectOptions,
   selectTagsValuesByItemId,
-  selectTagsManager
-} from 'selectors';
+  selectTagsManager,
+  selectFilteringTagsNames
+} from 'selectors/tagsSelectors';
 import {
   addTagToItems,
   deleteTagFromItems,
@@ -15,28 +16,25 @@ import {
 } from 'actions/storage';
 
 const StyledModal = styled(Modal)`
-  & {
-    min-height: 250px;
-  }
+  min-height: 250px;
 `;
 
 const StyledDropdown = styled(Dropdown)`
-  & {
+  display: flex !important;
+  flex-wrap: wrap;
+  margin-top: 25px;
+  .label {
+    flex-grow: 1;
     display: flex !important;
-    flex-wrap: wrap;
-    margin-top: 25px;
-    .label {
-      flex-grow: 1;
-      display: flex !important;
-      justify-content: center;
-    }
-    input {
-      flex-grow: 100;
-      display: flex !important;
-      width: auto !important;
-    }
+    justify-content: center;
+  }
+  input {
+    flex-grow: 100;
+    display: flex !important;
+    width: auto !important;
   }
 `;
+
 class TagsEditor extends PureComponent {
   constructor(props) {
     super(props);
@@ -127,9 +125,12 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-export default connect(mapStateToProps, {
-  deleteTagFromItems,
-  addTagToItems,
-  toggleTagsEdit,
-  searchTagsRequest
-})(TagsEditor);
+export default connect(
+  mapStateToProps,
+  {
+    deleteTagFromItems,
+    addTagToItems,
+    toggleTagsEdit,
+    searchTagsRequest
+  }
+)(TagsEditor);

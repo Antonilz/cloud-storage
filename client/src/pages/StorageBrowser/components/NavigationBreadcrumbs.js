@@ -1,6 +1,12 @@
 import React, { PureComponent } from 'react';
 import { separateLink } from 'utils/separateLink';
 import { Breadcrumb, Icon } from 'semantic-ui-react';
+import styled from 'styled-components';
+
+const StyledHomeIcon = styled(Icon)`
+  color: ${props => props.link && '#5995ED'};
+  padding-bottom: 30px;
+`;
 
 class NavigationBreadcrumbs extends PureComponent {
   handleLinkClick({ pathSlug }) {
@@ -11,18 +17,17 @@ class NavigationBreadcrumbs extends PureComponent {
     if (name === 'home') {
       if (!last) {
         return [
-          <Icon
+          <StyledHomeIcon
             key={index}
             onClick={e => this.handleLinkClick({ pathSlug })}
             name="home"
             link
             size="large"
-            style={{ color: '#5995ED' }}
           />,
           <Breadcrumb.Divider icon="right chevron" key={`${index}-divider`} />
         ];
       } else {
-        return <Icon key={index} size="large" name="home" />;
+        return <StyledHomeIcon key={index} size="large" name="home" />;
       }
     }
     if (!last) {

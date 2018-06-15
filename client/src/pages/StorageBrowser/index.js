@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
-import { Container } from 'semantic-ui-react';
+import { Container, Responsive } from 'semantic-ui-react';
 import { withRouter } from 'react-router-dom';
 import { Route } from 'react-router';
 import { NotificationContainer } from 'react-notifications';
@@ -16,9 +16,8 @@ import Sidebar from './components/Sidebar';
 import CheckedItemsTagsEditor from './containers/CheckedItemsTagsEditor';
 //import Gallery from './Gallery';
 
-import { selectStorageIsFetching } from 'selectors';
-
 import {
+  selectStorageIsFetching,
   selectSortedItemsIds,
   selectCheckedItemsIds,
   selectCheckedItems,
@@ -46,36 +45,31 @@ import styled, { injectGlobal } from 'styled-components';
 import { APP_NAME } from 'constants/app';
 
 const StyledStoragePage = styled.div`
-  & {
-    min-height: 100vh;
-  }
+  min-height: 100vh;
 `;
 
 const StyledStorageContentWrapper = styled(Container)`
-  & {
-    padding-bottom: 25px;
-    user-select: none;
-  }
+  padding-bottom: 25px;
+  user-select: none;
 `;
 
 const FixedContainer = styled(Container)`
-  & {
-    position: sticky;
-    top: 70px;
-    margin-top: 0;
-    padding-top: 25px;
-    padding-bottom: 25px;
-    z-index: 200;
-    display: flex;
-    background-color: #edeef0;
-  }
+  position: sticky;
+  top: 70px;
+  margin-top: 0;
+  padding-top: 25px;
+  padding-bottom: 25px;
+  z-index: 200;
+  display: flex;
+  background-color: #edeef0;
 `;
 
 const MainContent = styled.div`
-  & {
-    padding-left: 160px;
-    padding-right: 3vw;
+  @media (max-width: 768px) {
+    padding-left: 3vw;
   }
+  padding-left: 160px;
+  padding-right: 3vw;
 `;
 
 injectGlobal`
@@ -100,6 +94,7 @@ class StorageBrowser extends Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.location !== prevProps.location) {
+      console.log('folder changed');
       window.scrollTo(0, 0); // scroll to top on folder change
     }
   }
@@ -162,6 +157,10 @@ class StorageBrowser extends Component {
     });
   };
 
+  onUploadButtonClick = () => {
+    this.dropZone.open();
+  };
+
   render() {
     return (
       <StyledStoragePage>
@@ -193,7 +192,7 @@ class StorageBrowser extends Component {
             <StorageActionsMenu
               onDeleteSelectedItemsClick={this.deleteSelectedItems}
               onChangeViewClick={this.props.changeView}
-              onUploadButtonClick={() => this.dropZone.open()}
+              onUploadButtonClick={this.onUploadButtonClick}
               onTagsEditClick={this.editSelectedItemsTags}
               numOfSelectedItems={this.props.checkedItemsIds.length}
               handleCreateFolder={this.createFolder}

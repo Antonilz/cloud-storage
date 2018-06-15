@@ -5,7 +5,6 @@ import FilesViewGrid from './FilesViewGrid';
 
 const FilesView = props => {
   const { storageIsFetching, currentViewType } = props;
-
   return (
     <React.Fragment>
       {storageIsFetching && (
