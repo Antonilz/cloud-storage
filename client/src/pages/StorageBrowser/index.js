@@ -93,22 +93,17 @@ class StorageBrowser extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.location !== prevProps.location) {
+    if (
+      this.props.location !== prevProps.location &&
+      this.props.location.pathname !== '/storage/tags'
+    ) {
       console.log('folder changed');
+      const pathSlug = this.props.location.pathname.replace(
+        /\/storage\/home.|\/storage\/home/,
+        ''
+      );
+      this.props.folderInfoRequest({ pathSlug, notInitial: false });
       window.scrollTo(0, 0); // scroll to top on folder change
-    }
-  }
-
-  componentWillUpdate(nextProps) {
-    if (nextProps.location.pathname === '/storage/tags') {
-    } else {
-      if (nextProps.location.pathname !== this.props.location.pathname) {
-        const pathSlug = nextProps.location.pathname.replace(
-          /\/storage\/home.|\/storage\/home/,
-          ''
-        );
-        this.props.folderInfoRequest({ pathSlug, notInitial: false });
-      }
     }
   }
 
