@@ -30,7 +30,6 @@ class StorageHeader extends PureComponent {
             />
             storage
           </Menu.Item>
-
           <Menu.Menu position="right">
             <Menu.Item>
               <SearchItems />

@@ -9,7 +9,6 @@ import {
 } from 'redux-saga/effects';
 import { delay } from 'redux-saga';
 import axios from 'axios';
-import moment from 'moment';
 import { push } from 'react-router-redux';
 import { API_URL } from '../constants/api';
 import { setToken, deleteToken, getToken } from '../utils/localStorage';
@@ -110,7 +109,6 @@ export function* refreshTokens() {
 
 export function* needRefresh() {
   const { expiresIn } = yield select(selectTokensData);
-  //return moment(expiresIn).isBefore();
   return Date.parse(expiresIn) < new Date();
 }
 

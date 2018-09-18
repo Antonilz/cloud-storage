@@ -5,7 +5,6 @@ import { Grid, Header, Progress, Segment } from 'semantic-ui-react';
 import { formatBytes } from 'utils/formatBytes';
 import FullScreenDropzone from '../components/FullScreenDropzone';
 import { UPLOAD_URL } from 'constants/api';
-//import mime from 'mime-types';
 
 class UploadToMinio extends PureComponent {
   handleFinishedUpload = info => {
@@ -14,7 +13,6 @@ class UploadToMinio extends PureComponent {
       name: info.file.name,
       size: info.file.size,
       type: info.file.type === '' ? 'application/octet-stream' : info.file.type
-      //type: info.file.type === '' ? 'application/octet-stream'mime.lookup(info.file.name) : info.file.type
     };
     const samePath = this.props.pathSlug == info.file.path;
     this.props.createFile({ pathSlug: info.file.path, file, samePath });

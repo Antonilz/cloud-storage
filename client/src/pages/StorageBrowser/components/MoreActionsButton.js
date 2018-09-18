@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react';
-import { separateLink } from 'utils/separateLink';
-import { Table, Icon, Dropdown } from 'semantic-ui-react';
+import { Dropdown } from 'semantic-ui-react';
 
 class MoreActionsButton extends PureComponent {
   render() {

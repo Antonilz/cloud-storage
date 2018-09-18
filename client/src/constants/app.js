@@ -1,1 +1,1 @@
-export const APP_NAME = 'MPEI';
+export const APP_NAME = ' ';

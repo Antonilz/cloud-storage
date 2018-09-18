@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import registerServiceWorker from './registerServiceWorker';
 import configureStore from './configureStore';
 import { ConnectedRouter } from 'react-router-redux';
 import createHistory from 'history/createBrowserHistory';
@@ -45,5 +44,4 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-registerServiceWorker();
 //whyDidYouUpdate(React);

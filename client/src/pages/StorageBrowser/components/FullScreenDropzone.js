@@ -28,23 +28,20 @@ class FullScreenDropzone extends PureComponent {
     const { filename } = props;
   }
 
-  componentDidMount = () => this.setUploaderOptions(this.props);
   componentWillReceiveProps = props => this.setUploaderOptions(props);
 
   setUploaderOptions = props => {
     this.setState({
-      uploaderOptions: Object.assign(
-        {
-          signingUrl: '/s3/sign',
-          s3path: '',
-          contentDisposition: 'auto',
-          uploadRequestHeaders: { 'x-amz-acl': 'public-read' },
-          onFinishS3Put: this.handleFinish,
-          onProgress: this.handleProgress,
-          onError: this.handleError
-        },
-        props.upload
-      )
+      uploaderOptions: {
+        signingUrl: '/s3/sign',
+        s3path: '',
+        contentDisposition: 'auto',
+        uploadRequestHeaders: { 'x-amz-acl': 'public-read' },
+        onFinishS3Put: this.handleFinish,
+        onProgress: this.handleProgress,
+        onError: this.handleError,
+        ...props.upload
+      }
     });
   };
 
@@ -67,9 +64,11 @@ class FullScreenDropzone extends PureComponent {
     });
     this.setState({
       files,
-      dropzoneActive: false
+      dropzoneActive: false,
+      uploadedFiles: [],
+      error: null,
+      progress: null
     });
-    this.setState({ uploadedFiles: [], error: null, progress: null });
     const options = {
       files,
       ...this.state.uploaderOptions
