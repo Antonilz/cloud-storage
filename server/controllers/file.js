@@ -23,13 +23,13 @@ exports.create = async (req, res, next) => {
       pathSlug: pathSlug ? pathSlug : '',
       parentID: parentFolder ? parentFolder._id : null
     };
-    const newFile = new File(file);
-    const savedFile = await newFile.save();
-    const fileURL = await savedFile.getDownloadLink();
+    const newFile = await new File(file).save();
+    const fileURL = await newFile.getDownloadLink();
     return res.status(httpStatus.CREATED).json({
       type: 'file',
+      preview: fileURL.previewURL,
       data: {
-        ...savedFile.transform(),
+        ...newFile.transform(),
         inlineURL: fileURL.inlineURL,
         attachmentURL: fileURL.attachmentURL
       }

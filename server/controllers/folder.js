@@ -23,7 +23,6 @@ exports.load = async (req, res, next, id) => {
  */
 exports.get = async (req, res, next) => {
   const pathSlug = req.params[0].trim();
-  //Folder.getUpGoingFolderStructure(pathSlug);
   let rootFolder = false;
   if (pathSlug != null && pathSlug != '') {
     rootFolder = await Folder.find({
@@ -39,16 +38,18 @@ exports.get = async (req, res, next) => {
     Folder.getChildrenNodes(rootFolder ? rootFolder._id : null),
     File.getChildrenNodes(rootFolder ? rootFolder._id : null)
   ]);
-  /*const filesURLs = await Promise.all(
+
+  const filesURLs = await Promise.all(
     childrenFiles.map(async file => await file.getDownloadLink())
-  );*/
+  );
 
   return res.json({
     children: [
       ...childrenFiles.map((file, index) => {
         return {
           type: 'file',
-          data: file
+          data: file,
+          preview: filesURLs[index].previewURL
         };
       }),
       ...childrenFolders.map(folder => {

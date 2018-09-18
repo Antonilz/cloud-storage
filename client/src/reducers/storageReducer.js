@@ -21,7 +21,8 @@ import {
   DELETE_TAG_SUCCESS,
   GET_FILES_URLS_SUCCESS,
   ADD_FILTER_TAG,
-  DELETE_FILTER_TAG
+  DELETE_FILTER_TAG,
+  GET_FOLDER_FAILURE
 } from '../constants/actionTypes';
 
 const initialState = {
@@ -78,6 +79,8 @@ export default function(state = initialState, action) {
         selected: 0,
         isFetching: false
       };
+    case GET_FOLDER_FAILURE:
+      return { ...state, isFetching: false };
     case SEARCH_ITEMS_REQUEST:
       return {
         ...state,

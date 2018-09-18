@@ -127,14 +127,13 @@ class GridCell extends PureComponent {
       <StyledCell style={this.props.style} checked={item.checked}>
         <StyledThumbnailContainer
           onClick={this.handleItemLabelClick}
-          imageURL={item.data.inlineURL}
+          imageURL={item.preview}
           checked={item.checked}
         >
           {!(
             item.type === 'file' &&
             item.data.type.includes('image') &&
-            item.data.inlineURL &&
-            'image'
+            item.preview
           ) && (
             <Icon
               name={

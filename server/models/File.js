@@ -14,6 +14,7 @@ const Folder = require('./Folder');
 const Tag = require('./Tag');
 const keys = require('../config/keys');
 const APIError = require('../utils/APIError');
+const { createImagePreview } = require('../services/resize');
 
 const FileSchema = new Schema(
   {
@@ -56,6 +57,9 @@ FileSchema.index({ parentID: 1 });
 FileSchema.pre('save', async function save(next) {
   try {
     if (this.isNew) {
+      if (this.type.includes('image')) {
+        await createImagePreview(this.uuid);
+      }
       this.formattedSize = formatBytes(this.size);
     }
     this.formattedLastModified = moment(this.updatedAt).format(
@@ -97,7 +101,6 @@ FileSchema.pre('find', function() {
 
 FileSchema.pre('update', function save(next) {
   this.populate('tags');
-  console.log('updating');
   this.formattedLastModified = moment(this.updatedAt).format(
     'DD/MM/YYYY HH:mm'
   );
@@ -142,17 +145,18 @@ FileSchema.method({
       fileName: this.name,
       contentDispositionType: 'inline'
     });
-    return { inlineURL, attachmentURL };
+
+    const previewURL = await getSignedDownloadLink({
+      bucketName: 'previews',
+      objectName: `${this.uuid}-256x256.png`,
+      fileName: this.name,
+      contentDispositionType: 'inline'
+    });
+    return { inlineURL, attachmentURL, previewURL };
   }
 });
 
 FileSchema.statics = {
-  /**
-   * Get file by id
-   *
-   * @param {ObjectId} id - The objectId of file.
-   * @returns {Promise<User, APIError>}
-   */
   async get(id) {
     try {
       let file;
@@ -225,6 +229,7 @@ FileSchema.statics = {
       'id formattedLastModified'
     );
   },
+
   async removeTagByIdFromFiles(itemsIds, tagId) {
     await this.update(
       { _id: { $in: itemsIds } },
@@ -234,13 +239,6 @@ FileSchema.statics = {
     return await this.find({ _id: { $in: itemsIds } });
   },
 
-  /**
-   * Return new validation error
-   * if error is a mongoose duplicate key error
-   *
-   * @param {Error} error
-   * @returns {Error|APIError}
-   */
   checkDuplicateFile(error) {
     if (error.name === 'MongoError' && error.code === 11000) {
       return new APIError({

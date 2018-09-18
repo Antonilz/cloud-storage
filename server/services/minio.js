@@ -21,65 +21,77 @@ const s3Client = new aws.S3({
   endpoint: keys.endpoint
 });
 
-async function getSignedUploadLink({ bucketName, objectName, expiryTime }) {
-  try {
-    return new Promise((resolve, reject) => {
-      minioClient.presignedPutObject(
-        bucketName,
-        objectName,
-        expiryTime,
-        (err, presignedUrl) => (err ? reject(err) : resolve(presignedUrl))
-      );
-    });
-  } catch (err) {
-    throw err;
-  }
+function getSignedUploadLink({ bucketName, objectName, expiryTime }) {
+  return new Promise((resolve, reject) => {
+    minioClient.presignedPutObject(
+      bucketName,
+      objectName,
+      expiryTime,
+      (err, presignedUrl) => (err ? reject(err) : resolve(presignedUrl))
+    );
+  });
 }
 
-async function getSignedDownloadLink({
+function getSignedDownloadLink({
   bucketName,
   objectName,
   fileName,
   contentDispositionType
 }) {
-  try {
-    const params = {
-      Bucket: bucketName,
-      Key: objectName,
-      ResponseContentDisposition: contentDisposition(fileName, {
-        type: contentDispositionType
-      })
-    };
-    return new Promise((resolve, reject) => {
-      s3Client.getSignedUrl('getObject', params, (err, presignedUrl) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(presignedUrl);
-        }
-      });
+  const params = {
+    Bucket: bucketName,
+    Key: objectName,
+    ResponseContentDisposition: contentDisposition(fileName, {
+      type: contentDispositionType
+    })
+  };
+  return new Promise((resolve, reject) => {
+    s3Client.getSignedUrl('getObject', params, (err, presignedUrl) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(presignedUrl);
+      }
     });
-  } catch (err) {
-    console.log(err);
-  }
+  });
 }
 
-async function deleteObject(bucketName, objectName) {
-  try {
-    await new Promise((resolve, reject) => {
-      minioClient.removeObject(
-        bucketName,
-        objectName,
-        err => (err ? reject(err) : resolve(true))
-      );
+function deleteObject(bucketName, objectName) {
+  return new Promise((resolve, reject) => {
+    minioClient.removeObject(
+      bucketName,
+      objectName,
+      err => (err ? reject(err) : resolve(true))
+    );
+  });
+}
+
+function getObject(bucketName, objectName) {
+  return new Promise((resolve, reject) => {
+    minioClient.getObject(bucketName, objectName, (err, dataStream) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(dataStream);
     });
-  } catch (err) {
-    console.log(err);
-  }
+  });
+}
+
+function putObject(bucketName, objectName, fileStream) {
+  return new Promise((resolve, reject) => {
+    minioClient.putObject(bucketName, objectName, fileStream, {}, err => {
+      if (err) {
+        reject(err);
+      }
+      resolve(true);
+    });
+  });
 }
 
 module.exports = {
   getSignedUploadLink,
   getSignedDownloadLink,
-  deleteObject
+  deleteObject,
+  getObject,
+  putObject
 };

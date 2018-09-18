@@ -7,20 +7,16 @@ const { authorize, ADMIN, LOGGED_USER } = require('../middlewares/auth');
 
 const router = express.Router();
 
-// get folder info
 router.route('/folders/*').get(authorize(LOGGED_USER), folderController.get);
 
-// create new folder
 router
   .route('/folders/*')
   .post(authorize(LOGGED_USER), folderController.create);
 
-// update folder info (tags, path, permissions, etc.)
 router
   .route('/folders/*')
   .patch(authorize(LOGGED_USER), folderController.update);
 
-// delete array of items (files, folders) and all children folders
 router
   .route('/items/delete')
   .post(authorize(LOGGED_USER), itemController.delete);
@@ -32,7 +28,6 @@ router
   .route('/s3/sign')
   .get(authorize(LOGGED_USER), fileController.getUploadURL);
 
-// link amazon s3 uuid to DB model
 router
   .route('/files/create')
   .post(authorize(LOGGED_USER), fileController.create);
