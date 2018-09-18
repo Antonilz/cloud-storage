@@ -4,7 +4,7 @@ import FilesViewList from './FilesViewList';
 import FilesViewGrid from './FilesViewGrid';
 
 const FilesView = props => {
-  const { storageIsFetching, currentViewType } = props;
+  const { storageIsFetching, currentViewType, itemsCount } = props;
   return (
     <React.Fragment>
       {storageIsFetching && (
@@ -17,11 +17,9 @@ const FilesView = props => {
         </Dimmer>
       )}
       <Dimmer.Dimmable blurring dimmed={storageIsFetching}>
-        {currentViewType === 'list' ? (
-          <FilesViewList {...props} />
-        ) : (
-          <FilesViewGrid {...props} />
-        )}
+        {currentViewType === 'list'
+          ? itemsCount > 0 && <FilesViewList {...props} />
+          : itemsCount > 0 && <FilesViewGrid {...props} />}
       </Dimmer.Dimmable>
     </React.Fragment>
   );

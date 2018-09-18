@@ -3,7 +3,6 @@ import { Checkbox } from 'semantic-ui-react';
 import styled from 'styled-components';
 import { Table as VTable, AutoSizer, WindowScroller } from 'react-virtualized';
 import ListRow from '../containers/ListRow';
-//import 'react-virtualized/styles.css';
 
 const StyledTable = styled(VTable)`
   background-color: white;
@@ -52,7 +51,7 @@ class FilesViewList extends PureComponent {
       <ListRow
         id={this.props.itemsIDs[index]}
         index={index}
-        key={index}
+        key={key}
         itemsCount={this.props.itemsIDs.length}
         style={{ ...style, overflow: 'visible' }}
         onFolderClick={this.props.onFolderClick}
@@ -91,32 +90,28 @@ class FilesViewList extends PureComponent {
   render() {
     const { selectedItemsCount, itemsIDs } = this.props;
     return (
-      <React.Fragment>
-        {itemsIDs.length > 0 && (
-          <WindowScroller>
-            {({ height, isScrolling, onChildScroll, scrollTop }) => (
-              <AutoSizer disableHeight>
-                {({ width }) => (
-                  <StyledTable
-                    autoHeight
-                    scrollTop={scrollTop}
-                    isScrolling={isScrolling}
-                    onScroll={onChildScroll}
-                    width={width}
-                    height={height}
-                    rowHeight={80}
-                    rowCount={itemsIDs.length}
-                    overScanRowCount={15}
-                    rowRenderer={this.rowRenderer}
-                    headerRowRenderer={this.headerRowRenderer}
-                    rowGetter={({ index }) => itemsIDs[index]}
-                  />
-                )}
-              </AutoSizer>
+      <WindowScroller>
+        {({ height, isScrolling, onChildScroll, scrollTop }) => (
+          <AutoSizer disableHeight>
+            {({ width }) => (
+              <StyledTable
+                autoHeight
+                scrollTop={scrollTop}
+                isScrolling={isScrolling}
+                onScroll={onChildScroll}
+                width={width}
+                height={height}
+                rowHeight={80}
+                rowCount={itemsIDs.length}
+                overScanRowCount={15}
+                rowRenderer={this.rowRenderer}
+                headerRowRenderer={this.headerRowRenderer}
+                rowGetter={({ index }) => itemsIDs[index]}
+              />
             )}
-          </WindowScroller>
+          </AutoSizer>
         )}
-      </React.Fragment>
+      </WindowScroller>
     );
   }
 }

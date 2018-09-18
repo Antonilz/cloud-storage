@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
-const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const httpStatus = require('http-status');
 const moment = require('moment-timezone');
@@ -93,12 +92,6 @@ UserSchema.method({
 UserSchema.statics = {
   roles,
 
-  /**
-   * Get user
-   *
-   * @param {ObjectId} id - The objectId of user.
-   * @returns {Promise<User, APIError>}
-   */
   async get(id) {
     try {
       let user;
@@ -156,13 +149,6 @@ UserSchema.statics = {
     });
   },
 
-  /**
-   * Return new validation error
-   * if error is a mongoose duplicate key error
-   *
-   * @param {Error} error
-   * @returns {Error}
-   */
   checkDuplicateEmail(error) {
     if (error.name === 'MongoError' && error.code === 11000) {
       throw new APIError({

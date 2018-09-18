@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const moment = require('moment-timezone');
 
-/**
- * Refresh Token Schema
- * @private
- */
 const RefreshTokenSchema = new mongoose.Schema({
   token: {
     type: String,
@@ -50,8 +46,5 @@ RefreshTokenSchema.statics = {
   }
 };
 
-/**
- * @typedef RefreshToken
- */
 const RefreshToken = mongoose.model('refreshTokens', RefreshTokenSchema);
 module.exports = RefreshToken;

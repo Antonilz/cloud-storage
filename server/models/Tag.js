@@ -1,9 +1,5 @@
 const mongoose = require('mongoose');
 
-/**
- * Item Tag Schema
- * @private
- */
 const TagSchema = new mongoose.Schema(
   {
     name: {

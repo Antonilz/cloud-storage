@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const User = require('../models/User');
-const RefreshToken = require('../models/refreshToken');
+const RefreshToken = require('../models/RefreshToken');
 const moment = require('moment-timezone');
 const { jwtExpirationInterval } = require('../config/keys');
 

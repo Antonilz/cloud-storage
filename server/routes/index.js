@@ -4,9 +4,6 @@ const userRoutes = require('./userRoutes');
 const storageRoutes = require('./storageRoutes');
 const router = express.Router();
 
-/**
- * GET /status
- */
 router.get('/status', (req, res) => res.send('OK'));
 
 router.use('/auth', authRoutes);

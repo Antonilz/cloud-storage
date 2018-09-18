@@ -119,12 +119,6 @@ FolderSchema.method({
 });
 
 FolderSchema.statics = {
-  /**
-   * Get folder by id
-   *
-   * @param {ObjectId} id - The objectId of folder.
-   * @returns {Promise<User, APIError>}
-   */
   async get(id) {
     try {
       let folder;
@@ -185,13 +179,6 @@ FolderSchema.statics = {
     });
   },
 
-  /**
-   * Return new validation error
-   * if error is a mongoose duplicate key error
-   *
-   * @param {Error} error
-   * @returns {Error|APIError}
-   */
   checkDuplicateFolder(error) {
     if (error.name === 'MongoError' && error.code === 11000) {
       return new APIError({

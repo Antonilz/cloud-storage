@@ -6,33 +6,6 @@ const Tag = require('../models/Tag');
 const keys = require('../config/keys');
 
 /**
- * Get folder
- * @public
- */
-exports.get = async (req, res) => {
-  const path = req.params[0].trim();
-  if (path != null && path != '') {
-    let rootFolder = await Folder.find({
-      path: path
-    }).limit(1);
-    if (rootFolder[0] == null) {
-      return res.sendStatus(404);
-    } else {
-      rootFolder = rootFolder[0];
-    }
-
-    let children = await Folder.getChildrenNodes(rootFolder._id);
-    children = children.map(child => child.transform());
-    rootFolder = rootFolder.transform();
-    return res.json({ children: children, currentFolder: rootFolder });
-  } else {
-    let children = await Folder.getChildrenNodes(null);
-    children = children.map(child => child.transform());
-    return res.json({ children: children, currentFolder: '' });
-  }
-};
-
-/**
  * Delete items (folders/files)
  * @public
  */
