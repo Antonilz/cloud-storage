@@ -1,7 +1,9 @@
 module.exports = {
-  googleClientID: process.env.GOOGLE_CLIENT_ID,
-  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   mongoURI: process.env.MONGO_URI,
-  cookieKey: process.env.COOKIE_KEY,
-  redirectDomain: process.env.REDIRECT_DOMAIN
+  bucketName: process.env.BUCKET_NAME,
+  storageAccessKey: process.env.STORAGE_ACCESS_KEY,
+  storageSecretAccessKey: process.env.STORAGE_SECRET_ACCESS_KEY,
+  secret: process.env.SECRET_JWT,
+  jwtExpirationInterval: process.env.JWT_EXPIRATION_INTERVAL,
+  endpoint: process.env.S3_ENDPOINT
 };
