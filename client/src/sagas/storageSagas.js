@@ -61,6 +61,12 @@ export function* getFolderInfo({ accessToken, pathSlug }) {
     }
   } catch (error) {
     yield put({ type: GET_FOLDER_FAILURE, error: error.message });
+    yield put(push('/storage/home'));
+    NotificationManager.error(
+      ``,
+      `The folder '${pathSlug}' doesn't exist`,
+      3000
+    );
   }
 }
 
