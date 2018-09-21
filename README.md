@@ -9,6 +9,8 @@ async actions handling: Redux-saga+axios\
 styling: Semantic-UI, styled-components\
 forms: Redux-form\
 routing: React-router
+# diagram
+![alt tag](https://github.com/Antonilz/cloud-storage/blob/master/diagram.PNG)
 # installation
 ```npm install``` in client and server directories
 create or use mongoDB server/service
